@@ -43,6 +43,31 @@ Abre [http://localhost:3000](http://localhost:3000).
 - CRUD real de workflows.
 - Streaming de respuesta en tiempo real.
 
+## Deploy en Dokploy (VPS)
+
+Configuración recomendada:
+
+- Provider: `Git` (GitHub repo)
+- Branch: `main`
+- Build Type: `Dockerfile`
+- Dockerfile Path: `./Dockerfile`
+- Port interno: `3000`
+
+Variables de entorno mínimas:
+
+- `OPENROUTER_API_KEY`
+- `NODE_ENV=production`
+
+Si usas Supabase/n8n/CLAW en producción, agrega también:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (solo backend)
+- `N8N_BASE_URL`
+- `N8N_API_KEY`
+- `CLAW_API_URL`
+- `CLAW_API_TOKEN`
+
 To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
