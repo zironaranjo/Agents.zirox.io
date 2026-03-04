@@ -3,10 +3,8 @@
 import { useMemo } from "react";
 import {
   Background,
-  Controls,
   Handle,
   MarkerType,
-  MiniMap,
   Position,
   ReactFlow,
   type NodeProps,
@@ -139,15 +137,15 @@ export function AgentCanvas({ agents }: AgentCanvasProps) {
         nodesDraggable
         nodesConnectable={false}
         elementsSelectable={true}
+        panOnDrag={false}
+        panOnScroll={false}
+        zoomOnScroll={false}
+        zoomOnPinch={false}
+        zoomOnDoubleClick={false}
         proOptions={{ hideAttribution: true }}
       >
-        <MiniMap
-          pannable
-          zoomable
-          nodeColor={(node) => (node.data?.kind === "principal" ? "#10b981" : "#22d3ee")}
-          className="!bg-slate-900/95"
-        />
-        <Controls className="!border-slate-700 !bg-slate-900 !text-slate-100" />
+        {/* UI reducida para el hero: sin minimap ni controles.
+           En una vista dedicada de workflows reactivaremos navegación completa. */}
         <Background color="#1f2937" gap={18} />
       </ReactFlow>
     </div>

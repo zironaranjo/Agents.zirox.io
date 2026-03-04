@@ -41,10 +41,6 @@ async function getAgentsForLanding() {
 
 export default async function Home() {
   const agents = await getAgentsForLanding();
-  const totalSubagentes = agents.reduce(
-    (acumulado, agente) => acumulado + agente.subagentes.length,
-    0,
-  );
 
   return (
     <main className="landing-bg min-h-screen px-4 py-10 text-slate-100 md:px-8 xl:px-12">
@@ -128,22 +124,8 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="space-y-4 xl:col-span-5">
+          <div className="xl:col-span-5">
             <HeroGeometry />
-            <div className="grid gap-4 sm:grid-cols-3">
-              <article className="glass-panel rounded-xl p-4">
-                <p className="text-sm text-slate-400">Agentes principales</p>
-                <p className="mt-2 text-3xl font-semibold">{agents.length}</p>
-              </article>
-              <article className="glass-panel rounded-xl p-4">
-                <p className="text-sm text-slate-400">Subagentes</p>
-                <p className="mt-2 text-3xl font-semibold">{totalSubagentes}</p>
-              </article>
-              <article className="glass-panel rounded-xl p-4">
-                <p className="text-sm text-slate-400">Integraciones</p>
-                <p className="mt-2 text-lg font-semibold">OpenClaw + n8n + Supabase</p>
-              </article>
-            </div>
           </div>
         </header>
 
