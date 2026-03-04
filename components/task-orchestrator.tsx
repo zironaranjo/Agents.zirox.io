@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ExecutorType = "claw" | "n8n";
 type PriorityType = "baja" | "media" | "alta";
@@ -54,6 +54,8 @@ export function TaskOrchestrator() {
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [isDelegating, setIsDelegating] = useState(false);
   const [isCheckingRun, setIsCheckingRun] = useState(false);
+  const [autoPollingEnabled, setAutoPollingEnabled] = useState(true);
+  const [lastCheckedAt, setLastCheckedAt] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -64,6 +66,11 @@ export function TaskOrchestrator() {
       return null;
     }
   }, [inputJson]);
+
+  const runIsTerminal = useMemo(() => {
+    const status = runData?.estado?.toLowerCase();
+    return status === "completado" || status === "error";
+  }, [runData?.estado]);
 
   const createTask = async () => {
     if (!descripcion.trim()) {
@@ -163,6 +170,7 @@ export function TaskOrchestrator() {
 
       if (payload.runId) {
         setRunId(payload.runId);
+        setAutoPollingEnabled(true);
       }
       setStatusMessage(`Delegación enviada a ${executor.toUpperCase()}.`);
     } catch (error) {
@@ -174,14 +182,16 @@ export function TaskOrchestrator() {
     }
   };
 
-  const checkRunStatus = async () => {
+  const checkRunStatus = useCallback(async (options?: { silent?: boolean }) => {
     if (!runId.trim()) {
       setErrorMessage("No hay runId para consultar.");
       return;
     }
 
-    setErrorMessage("");
-    setIsCheckingRun(true);
+    if (!options?.silent) {
+      setErrorMessage("");
+      setIsCheckingRun(true);
+    }
 
     try {
       const response = await fetch(`/api/runs/${runId}`);
@@ -192,15 +202,36 @@ export function TaskOrchestrator() {
       }
 
       setRunData(payload.run);
-      setStatusMessage(`Estado actual del run: ${payload.run.estado}`);
+      setLastCheckedAt(new Date().toLocaleTimeString());
+      if (!options?.silent) {
+        setStatusMessage(`Estado actual del run: ${payload.run.estado}`);
+      }
+
+      if (payload.run.estado.toLowerCase() === "completado" || payload.run.estado.toLowerCase() === "error") {
+        setAutoPollingEnabled(false);
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo consultar el run.";
       setErrorMessage(message);
     } finally {
-      setIsCheckingRun(false);
+      if (!options?.silent) {
+        setIsCheckingRun(false);
+      }
     }
-  };
+  }, [runId]);
+
+  useEffect(() => {
+    if (!autoPollingEnabled || !runId.trim() || runIsTerminal) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      void checkRunStatus({ silent: true });
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [autoPollingEnabled, runId, runIsTerminal, checkRunStatus]);
 
   return (
     <section className="glass-panel rounded-2xl p-5">
@@ -335,6 +366,20 @@ export function TaskOrchestrator() {
             >
               {isCheckingRun ? "Consultando..." : "Consultar run"}
             </button>
+            <button
+              onClick={() => setAutoPollingEnabled((value) => !value)}
+              disabled={!runId.trim() || runIsTerminal}
+              className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {autoPollingEnabled ? "Pausar auto-polling" : "Reanudar auto-polling"}
+            </button>
+            <p className="text-xs text-slate-400">
+              Auto-polling:{" "}
+              <span className={autoPollingEnabled && !runIsTerminal ? "text-emerald-300" : "text-slate-300"}>
+                {autoPollingEnabled && !runIsTerminal ? "activo (cada 3s)" : "inactivo"}
+              </span>
+              {lastCheckedAt ? ` · Última consulta: ${lastCheckedAt}` : ""}
+            </p>
 
             {createdTask ? (
               <div className="rounded-lg border border-slate-700 bg-slate-900/70 p-3 text-xs text-slate-300">
