@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { PanelWorkspace } from "@/components/panel-workspace";
+import { TaskOrchestrator } from "@/components/task-orchestrator";
 
 export default function PanelPage() {
   return (
     <main className="landing-bg min-h-screen px-6 py-8 text-slate-100 md:px-10">
-      <section className="mx-auto max-w-6xl space-y-6">
+      <section className="mx-auto w-full max-w-[1700px] space-y-6">
         <header className="glass-panel flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Panel</p>
@@ -22,6 +23,7 @@ export default function PanelPage() {
         </header>
 
         <PanelWorkspace />
+        <TaskOrchestrator />
       </section>
     </main>
   );

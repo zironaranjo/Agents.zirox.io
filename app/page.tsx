@@ -1,9 +1,46 @@
 import { AgentCanvas } from "@/components/agent-canvas";
-import { agentesPrincipales, estadoColor } from "@/lib/agents";
+import { agentesPrincipales, estadoColor, type Agent } from "@/lib/agents";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
-export default function Home() {
-  const totalSubagentes = agentesPrincipales.reduce(
+async function getAgentsForLanding() {
+  try {
+    const supabase = getSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("agents")
+      .select(
+        "id,nombre,rol,estado,herramientas,subagentes,provider,model,system_prompt,temperature",
+      )
+      .order("created_at", { ascending: true });
+
+    if (error || !data) {
+      return agentesPrincipales;
+    }
+
+    const mapped = data.map((row) => ({
+      id: row.id as string,
+      nombre: row.nombre as string,
+      rol: row.rol as string,
+      estado: row.estado as Agent["estado"],
+      herramientas: (row.herramientas as string[] | null) ?? [],
+      subagentes: (row.subagentes as string[] | null) ?? [],
+      provider: (row.provider as Agent["provider"]) ?? "openrouter",
+      model: (row.model as string) ?? "openai/gpt-4o-mini",
+      systemPrompt:
+        (row.system_prompt as string) ??
+        "Eres un agente especializado. Responde de forma clara y accionable.",
+      temperature: (row.temperature as number) ?? 0.6,
+    }));
+
+    return mapped.length > 0 ? mapped : agentesPrincipales;
+  } catch {
+    return agentesPrincipales;
+  }
+}
+
+export default async function Home() {
+  const agents = await getAgentsForLanding();
+  const totalSubagentes = agents.reduce(
     (acumulado, agente) => acumulado + agente.subagentes.length,
     0,
   );
@@ -62,7 +99,7 @@ export default function Home() {
           <div className="grid gap-4 sm:grid-cols-2 xl:col-span-4 xl:grid-cols-2">
             <article className="glass-panel rounded-2xl p-4">
               <p className="text-sm text-slate-400">Agentes principales</p>
-              <p className="mt-2 text-3xl font-semibold">{agentesPrincipales.length}</p>
+              <p className="mt-2 text-3xl font-semibold">{agents.length}</p>
             </article>
             <article className="glass-panel rounded-2xl p-4">
               <p className="text-sm text-slate-400">Subagentes</p>
@@ -87,7 +124,7 @@ export default function Home() {
               Flujo visual de delegacion entre agentes y subagentes.
             </p>
           </div>
-          <AgentCanvas agents={agentesPrincipales} />
+          <AgentCanvas agents={agents} />
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
@@ -124,7 +161,7 @@ export default function Home() {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-3">
-          {agentesPrincipales.map((agente) => (
+          {agents.map((agente) => (
             <article
               key={agente.id}
               className="glass-panel space-y-4 rounded-2xl border border-slate-800 p-5"

@@ -37,6 +37,31 @@ Abre [http://localhost:3000](http://localhost:3000).
   - `POST /api/agents/run`
 - El frontend nunca expone la key; la llamada a OpenRouter ocurre del lado servidor.
 
+## Supabase (persistencia de agentes)
+
+1. En Supabase SQL Editor ejecuta el script:
+   - `supabase/schema.sql`
+2. Configura en tu entorno:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+3. Reinicia/redeploy para que `/panel` use carga y guardado real de agentes.
+
+## Endpoints base de orquestacion
+
+- `POST /api/tasks` crea una tarea en `tasks`.
+- `POST /api/claw/delegate` delega una tarea a tu API de CLAW y registra `task_runs`.
+- `POST /api/integrations/n8n/trigger` dispara un webhook n8n y registra `task_runs` (si envias `taskId`).
+- `GET /api/runs/:id` consulta estado/salida de una ejecucion.
+
+En `/panel` existe un bloque visual de orquestacion para ejecutar este flujo desde UI.
+
+Nota de configuración CLAW:
+
+- Opción A: usar `CLAW_API_URL` + `CLAW_DELEGATE_PATH`.
+- Opción B (preferida cuando no conoces el path): usar `CLAW_DELEGATE_URL` con URL completa.
+- Si `CLAW_DELEGATE_URL` existe, tiene prioridad sobre las otras dos.
+
 ## Próximos pasos
 
 - Persistencia de agentes en Supabase.

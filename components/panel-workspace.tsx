@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Agent, AgentStatus } from "@/lib/agents";
 import { agentesPrincipales, estadoColor } from "@/lib/agents";
 
@@ -21,6 +21,11 @@ function normalizeAgentError(message: string) {
 export function PanelWorkspace() {
   const [agents, setAgents] = useState<EditableAgent[]>(agentesPrincipales);
   const [selectedId, setSelectedId] = useState<string>(agentesPrincipales[0]?.id ?? "");
+  const [isLoadingAgents, setIsLoadingAgents] = useState(true);
+  const [isCreatingAgent, setIsCreatingAgent] = useState(false);
+  const [isSavingAgent, setIsSavingAgent] = useState(false);
+  const [syncMessage, setSyncMessage] = useState("");
+  const [dataError, setDataError] = useState("");
   const [testPrompt, setTestPrompt] = useState(
     "Crea una estrategia rápida para lanzar una campaña esta semana.",
   );
@@ -33,6 +38,41 @@ export function PanelWorkspace() {
     [agents, selectedId],
   );
 
+  useEffect(() => {
+    const loadAgents = async () => {
+      setIsLoadingAgents(true);
+      setDataError("");
+
+      try {
+        const response = await fetch("/api/agents", { method: "GET" });
+        const payload: { agents?: Agent[]; error?: string } = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.error ?? "No se pudieron cargar agentes.");
+        }
+
+        const loadedAgents = payload.agents ?? [];
+        if (loadedAgents.length > 0) {
+          setAgents(loadedAgents);
+          setSelectedId(loadedAgents[0].id);
+          setSyncMessage("Datos cargados desde Supabase.");
+        } else {
+          setSyncMessage("No hay agentes en Supabase todavía.");
+        }
+      } catch (unknownError) {
+        const message =
+          unknownError instanceof Error
+            ? unknownError.message
+            : "No se pudo cargar Supabase.";
+        setDataError(message);
+      } finally {
+        setIsLoadingAgents(false);
+      }
+    };
+
+    void loadAgents();
+  }, []);
+
   const updateSelectedAgent = (updates: Partial<EditableAgent>) => {
     if (!selectedAgent) return;
     setAgents((current) =>
@@ -40,7 +80,7 @@ export function PanelWorkspace() {
     );
   };
 
-  const createAgent = () => {
+  const createAgent = async () => {
     const timestamp = Date.now().toString().slice(-5);
     const nuevo: EditableAgent = {
       id: `agent-${timestamp}`,
@@ -55,8 +95,70 @@ export function PanelWorkspace() {
       temperature: 0.6,
     };
 
-    setAgents((current) => [nuevo, ...current]);
-    setSelectedId(nuevo.id);
+    setIsCreatingAgent(true);
+    setDataError("");
+    setSyncMessage("");
+
+    try {
+      const response = await fetch("/api/agents", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(nuevo),
+      });
+
+      const payload: { agent?: Agent; error?: string } = await response.json();
+      if (!response.ok || !payload.agent) {
+        throw new Error(payload.error ?? "No se pudo crear el agente.");
+      }
+
+      setAgents((current) => [payload.agent as EditableAgent, ...current]);
+      setSelectedId(payload.agent.id);
+      setSyncMessage("Agente creado y guardado en Supabase.");
+    } catch (unknownError) {
+      const message =
+        unknownError instanceof Error ? unknownError.message : "No se pudo crear el agente.";
+      setDataError(message);
+    } finally {
+      setIsCreatingAgent(false);
+    }
+  };
+
+  const saveSelectedAgent = async () => {
+    if (!selectedAgent) return;
+
+    setIsSavingAgent(true);
+    setDataError("");
+    setSyncMessage("");
+
+    try {
+      const response = await fetch(`/api/agents/${selectedAgent.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(selectedAgent),
+      });
+
+      const payload: { agent?: Agent; error?: string } = await response.json();
+      if (!response.ok || !payload.agent) {
+        throw new Error(payload.error ?? "No se pudo guardar el agente.");
+      }
+
+      setAgents((current) =>
+        current.map((agent) =>
+          agent.id === payload.agent?.id ? (payload.agent as EditableAgent) : agent,
+        ),
+      );
+      setSyncMessage("Cambios guardados en Supabase.");
+    } catch (unknownError) {
+      const message =
+        unknownError instanceof Error ? unknownError.message : "No se pudo guardar el agente.";
+      setDataError(message);
+    } finally {
+      setIsSavingAgent(false);
+    }
   };
 
   const runAgentTest = async () => {
@@ -110,14 +212,21 @@ export function PanelWorkspace() {
             <h2 className="text-lg font-semibold">Agentes</h2>
           </div>
           <button
-            onClick={createAgent}
-            className="rounded-md bg-cyan-400 px-3 py-2 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300"
+            onClick={() => void createAgent()}
+            disabled={isCreatingAgent || isLoadingAgents}
+            className="rounded-md bg-cyan-400 px-3 py-2 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            + Nuevo
+            {isCreatingAgent ? "Creando..." : "+ Nuevo"}
           </button>
         </div>
 
         <div className="space-y-2 pr-1">
+          {isLoadingAgents ? (
+            <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-3 text-sm text-slate-300">
+              Cargando agentes desde Supabase...
+            </div>
+          ) : null}
+
           {agents.map((agent) => {
             const isSelected = selectedId === agent.id;
             return (
@@ -161,6 +270,27 @@ export function PanelWorkspace() {
                 {selectedAgent.estado}
               </span>
             </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs text-slate-400">Sincroniza cambios manualmente con Supabase.</p>
+              <button
+                onClick={() => void saveSelectedAgent()}
+                disabled={isSavingAgent}
+                className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSavingAgent ? "Guardando..." : "Guardar cambios"}
+              </button>
+            </div>
+
+            {syncMessage ? (
+              <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+                {syncMessage}
+              </div>
+            ) : null}
+            {dataError ? (
+              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">
+                {dataError}
+              </div>
+            ) : null}
 
             <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/40 p-4">
               <h3 className="text-sm font-semibold text-slate-200">Identidad del agente</h3>
