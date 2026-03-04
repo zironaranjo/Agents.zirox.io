@@ -77,6 +77,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         model: body.model,
         temperature: body.temperature ?? 0.7,
+        max_tokens: 700,
         messages: [
           { role: "system", content: body.systemPrompt || "Eres un asistente útil." },
           { role: "user", content: body.userPrompt },

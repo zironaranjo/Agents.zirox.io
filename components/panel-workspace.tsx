@@ -7,6 +7,16 @@ import { agentesPrincipales, estadoColor } from "@/lib/agents";
 type EditableAgent = Agent;
 
 const estados: AgentStatus[] = ["idle", "activo", "ejecutando"];
+const baseFieldClass =
+  "w-full rounded-lg border border-slate-700/90 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-300/60 focus:ring-2 focus:ring-cyan-300/20";
+
+function normalizeAgentError(message: string) {
+  if (message.toLowerCase().includes("requires more credits")) {
+    return "OpenRouter indica créditos insuficientes para esta solicitud. Baja el consumo (prompt más corto/modelo más barato) o añade créditos en tu cuenta.";
+  }
+
+  return message;
+}
 
 export function PanelWorkspace() {
   const [agents, setAgents] = useState<EditableAgent[]>(agentesPrincipales);
@@ -85,17 +95,20 @@ export function PanelWorkspace() {
     } catch (unknownError) {
       const message =
         unknownError instanceof Error ? unknownError.message : "Error desconocido en la prueba.";
-      setError(message);
+      setError(normalizeAgentError(message));
     } finally {
       setIsRunning(false);
     }
   };
 
   return (
-    <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+    <section className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
       <aside className="glass-panel rounded-2xl p-4">
         <div className="mb-4 flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">Agentes</h2>
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Workspace</p>
+            <h2 className="text-lg font-semibold">Agentes</h2>
+          </div>
           <button
             onClick={createAgent}
             className="rounded-md bg-cyan-400 px-3 py-2 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300"
@@ -104,7 +117,7 @@ export function PanelWorkspace() {
           </button>
         </div>
 
-        <div className="space-y-2">
+        <div className="max-h-[70vh] space-y-2 overflow-auto pr-1">
           {agents.map((agent) => {
             const isSelected = selectedId === agent.id;
             return (
@@ -113,8 +126,8 @@ export function PanelWorkspace() {
                 onClick={() => setSelectedId(agent.id)}
                 className={`w-full rounded-lg border p-3 text-left transition ${
                   isSelected
-                    ? "border-cyan-300/70 bg-slate-800/80"
-                    : "border-slate-700 bg-slate-900/50 hover:bg-slate-800/60"
+                    ? "border-cyan-300/70 bg-slate-800/90 shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
+                    : "border-slate-700 bg-slate-900/60 hover:bg-slate-800/65"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -125,7 +138,7 @@ export function PanelWorkspace() {
                     {agent.estado}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-slate-300">{agent.rol}</p>
+                <p className="mt-1 line-clamp-2 text-xs text-slate-300">{agent.rol}</p>
               </button>
             );
           })}
@@ -136,156 +149,185 @@ export function PanelWorkspace() {
         {!selectedAgent ? (
           <p className="text-sm text-slate-300">Selecciona un agente para editarlo.</p>
         ) : (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Editor de agente</h2>
-
-            <label className="block space-y-1">
-              <span className="text-sm text-slate-300">Nombre</span>
-              <input
-                value={selectedAgent.nombre}
-                onChange={(event) => updateSelectedAgent({ nombre: event.target.value })}
-                className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
-              />
-            </label>
-
-            <label className="block space-y-1">
-              <span className="text-sm text-slate-300">Rol</span>
-              <input
-                value={selectedAgent.rol}
-                onChange={(event) => updateSelectedAgent({ rol: event.target.value })}
-                className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
-              />
-            </label>
-
-            <label className="block space-y-1">
-              <span className="text-sm text-slate-300">Estado</span>
-              <select
-                value={selectedAgent.estado}
-                onChange={(event) =>
-                  updateSelectedAgent({ estado: event.target.value as AgentStatus })
-                }
-                className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
+          <div className="space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Editor</p>
+                <h2 className="text-xl font-semibold">{selectedAgent.nombre}</h2>
+              </div>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${estadoColor[selectedAgent.estado]}`}
               >
-                {estados.map((estado) => (
-                  <option key={estado} value={estado}>
-                    {estado}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block space-y-1">
-              <span className="text-sm text-slate-300">Herramientas (coma separada)</span>
-              <input
-                value={selectedAgent.herramientas.join(", ")}
-                onChange={(event) =>
-                  updateSelectedAgent({
-                    herramientas: event.target.value
-                      .split(",")
-                      .map((tool) => tool.trim())
-                      .filter(Boolean),
-                  })
-                }
-                className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
-              />
-            </label>
-
-            <label className="block space-y-1">
-              <span className="text-sm text-slate-300">Subagentes (coma separada)</span>
-              <input
-                value={selectedAgent.subagentes.join(", ")}
-                onChange={(event) =>
-                  updateSelectedAgent({
-                    subagentes: event.target.value
-                      .split(",")
-                      .map((item) => item.trim())
-                      .filter(Boolean),
-                  })
-                }
-                className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
-              />
-            </label>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <label className="block space-y-1">
-                <span className="text-sm text-slate-300">Provider</span>
-                <select
-                  value={selectedAgent.provider}
-                  onChange={() =>
-                    updateSelectedAgent({
-                      provider: "openrouter",
-                    })
-                  }
-                  className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
-                >
-                  <option value="openrouter">openrouter</option>
-                </select>
-              </label>
-
-              <label className="block space-y-1">
-                <span className="text-sm text-slate-300">Modelo</span>
-                <input
-                  value={selectedAgent.model}
-                  onChange={(event) => updateSelectedAgent({ model: event.target.value })}
-                  className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
-                  placeholder="openai/gpt-4o-mini"
-                />
-              </label>
+                {selectedAgent.estado}
+              </span>
             </div>
 
-            <label className="block space-y-1">
-              <span className="text-sm text-slate-300">System Prompt</span>
-              <textarea
-                value={selectedAgent.systemPrompt}
-                onChange={(event) => updateSelectedAgent({ systemPrompt: event.target.value })}
-                rows={4}
-                className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
-              />
-            </label>
+            <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/40 p-4">
+              <h3 className="text-sm font-semibold text-slate-200">Identidad del agente</h3>
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="block space-y-1">
+                  <span className="text-sm text-slate-300">Nombre</span>
+                  <input
+                    value={selectedAgent.nombre}
+                    onChange={(event) => updateSelectedAgent({ nombre: event.target.value })}
+                    className={baseFieldClass}
+                  />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-sm text-slate-300">Estado</span>
+                  <select
+                    value={selectedAgent.estado}
+                    onChange={(event) =>
+                      updateSelectedAgent({ estado: event.target.value as AgentStatus })
+                    }
+                    className={baseFieldClass}
+                  >
+                    {estados.map((estado) => (
+                      <option key={estado} value={estado}>
+                        {estado}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
 
-            <label className="block space-y-1">
-              <span className="text-sm text-slate-300">Temperatura</span>
-              <input
-                type="number"
-                min={0}
-                max={2}
-                step={0.1}
-                value={selectedAgent.temperature}
-                onChange={(event) =>
-                  updateSelectedAgent({
-                    temperature: Number(event.target.value),
-                  })
-                }
-                className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
-              />
-            </label>
+              <label className="block space-y-1">
+                <span className="text-sm text-slate-300">Rol</span>
+                <input
+                  value={selectedAgent.rol}
+                  onChange={(event) => updateSelectedAgent({ rol: event.target.value })}
+                  className={baseFieldClass}
+                />
+              </label>
 
-            <div className="space-y-2 rounded-md border border-cyan-400/20 bg-cyan-500/5 p-4">
-              <p className="text-sm font-semibold text-cyan-200">Probar agente (OpenRouter)</p>
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="block space-y-1">
+                  <span className="text-sm text-slate-300">Herramientas (coma separada)</span>
+                  <input
+                    value={selectedAgent.herramientas.join(", ")}
+                    onChange={(event) =>
+                      updateSelectedAgent({
+                        herramientas: event.target.value
+                          .split(",")
+                          .map((tool) => tool.trim())
+                          .filter(Boolean),
+                      })
+                    }
+                    className={baseFieldClass}
+                  />
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-sm text-slate-300">Subagentes (coma separada)</span>
+                  <input
+                    value={selectedAgent.subagentes.join(", ")}
+                    onChange={(event) =>
+                      updateSelectedAgent({
+                        subagentes: event.target.value
+                          .split(",")
+                          .map((item) => item.trim())
+                          .filter(Boolean),
+                      })
+                    }
+                    className={baseFieldClass}
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/40 p-4">
+              <h3 className="text-sm font-semibold text-slate-200">Configuración LLM</h3>
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="block space-y-1">
+                  <span className="text-sm text-slate-300">Provider</span>
+                  <select
+                    value={selectedAgent.provider}
+                    onChange={() => updateSelectedAgent({ provider: "openrouter" })}
+                    className={baseFieldClass}
+                  >
+                    <option value="openrouter">openrouter</option>
+                  </select>
+                </label>
+                <label className="block space-y-1">
+                  <span className="text-sm text-slate-300">Modelo</span>
+                  <input
+                    value={selectedAgent.model}
+                    onChange={(event) => updateSelectedAgent({ model: event.target.value })}
+                    className={baseFieldClass}
+                    placeholder="openai/gpt-4o-mini"
+                  />
+                </label>
+              </div>
+
+              <label className="block space-y-1">
+                <span className="text-sm text-slate-300">System Prompt</span>
+                <textarea
+                  value={selectedAgent.systemPrompt}
+                  onChange={(event) => updateSelectedAgent({ systemPrompt: event.target.value })}
+                  rows={4}
+                  className={baseFieldClass}
+                />
+              </label>
+
+              <label className="block max-w-[220px] space-y-1">
+                <span className="text-sm text-slate-300">Temperatura</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={2}
+                  step={0.1}
+                  value={selectedAgent.temperature}
+                  onChange={(event) =>
+                    updateSelectedAgent({
+                      temperature: Number(event.target.value),
+                    })
+                  }
+                  className={baseFieldClass}
+                />
+              </label>
+            </section>
+
+            <section className="space-y-3 rounded-xl border border-cyan-400/25 bg-cyan-500/5 p-4">
+              <h3 className="text-sm font-semibold text-cyan-200">Prueba rápida de agente</h3>
               <textarea
                 value={testPrompt}
                 onChange={(event) => setTestPrompt(event.target.value)}
-                rows={3}
-                className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none ring-cyan-300/50 focus:ring"
+                rows={4}
+                className={baseFieldClass}
                 placeholder="Escribe una tarea para validar el agente..."
               />
-              <button
-                onClick={runAgentTest}
-                disabled={isRunning}
-                className="rounded-md bg-cyan-400 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isRunning ? "Ejecutando..." : "Probar agente"}
-              </button>
-              {error ? <p className="text-sm text-rose-300">{error}</p> : null}
-              {respuesta ? (
-                <pre className="overflow-x-auto whitespace-pre-wrap rounded-md border border-slate-700 bg-slate-950 p-3 text-sm text-slate-200">
-                  {respuesta}
-                </pre>
-              ) : null}
-            </div>
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  onClick={runAgentTest}
+                  disabled={isRunning}
+                  className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isRunning ? "Ejecutando..." : "Probar agente"}
+                </button>
+                <p className="text-xs text-slate-400">
+                  Consejo: usa prompts cortos para reducir costo de tokens.
+                </p>
+              </div>
 
-            <p className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
-              Siguiente paso: conectar este editor a Supabase para persistir configuración por agente.
+              {error ? (
+                <div className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-rose-300">Error</p>
+                  <p className="mt-1 text-sm text-rose-200">{error}</p>
+                </div>
+              ) : null}
+
+              {respuesta ? (
+                <div className="rounded-lg border border-emerald-400/25 bg-emerald-500/5 p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-emerald-300">Respuesta</p>
+                  <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-sm text-slate-100">
+                    {respuesta}
+                  </pre>
+                </div>
+              ) : null}
+            </section>
+
+            <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
+              Siguiente paso: conectar este editor a Supabase para persistir configuración por
+              agente.
             </p>
           </div>
         )}
