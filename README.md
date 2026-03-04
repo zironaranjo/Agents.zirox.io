@@ -1,26 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Agentes Matrix Web
 
-## Getting Started
+Frontend para visualizar y configurar agentes del sistema multiagente.
 
-First, run the development server:
+## Desarrollo local
+
+1. Instalar dependencias:
+
+```bash
+npm install
+```
+
+2. Configurar variables de entorno:
+
+```bash
+cp .env.example .env.local
+```
+
+Luego edita `.env.local` y coloca tu key:
+
+```bash
+OPENROUTER_API_KEY=tu_api_key_de_openrouter
+```
+
+3. Ejecutar:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## OpenRouter (MVP)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- En `/panel` puedes editar `provider`, `model`, `system prompt` y `temperature`.
+- Botón `Probar agente` llama al endpoint backend:
+  - `POST /api/agents/run`
+- El frontend nunca expone la key; la llamada a OpenRouter ocurre del lado servidor.
 
-## Learn More
+## Próximos pasos
+
+- Persistencia de agentes en Supabase.
+- CRUD real de workflows.
+- Streaming de respuesta en tiempo real.
 
 To learn more about Next.js, take a look at the following resources:
 

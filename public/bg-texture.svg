@@ -1,0 +1,24 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="g1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(300 140) rotate(25) scale(540 320)">
+      <stop stop-color="#2DD4BF" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#2DD4BF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1310 80) rotate(190) scale(500 300)">
+      <stop stop-color="#38BDF8" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1180 780) rotate(-20) scale(620 360)">
+      <stop stop-color="#A78BFA" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#A78BFA" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#93C5FD" fill-opacity="0.18"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#g1)"/>
+  <rect width="1600" height="900" fill="url(#g2)"/>
+  <rect width="1600" height="900" fill="url(#g3)"/>
+  <rect width="1600" height="900" fill="url(#dots)" opacity="0.35"/>
+</svg>
