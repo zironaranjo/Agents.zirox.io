@@ -10,6 +10,31 @@ type Category =
   | "support"
   | "devops";
 
+type WorkflowNode = {
+  id: string;
+  label: string;
+  executor: "n8n" | "claw" | "agent";
+  config?: Record<string, unknown>;
+};
+
+type WorkflowDefinition = {
+  version: string;
+  entryNodeId: string;
+  nodes: WorkflowNode[];
+  edges: Array<{ from: string; to: string; condition?: string }>;
+};
+
+type Template = {
+  id: string;
+  category: Exclude<Category, "all">;
+  title: string;
+  subtitle: string;
+  metricLabel: string;
+  metricValue: string;
+  description: string;
+  definition: WorkflowDefinition;
+};
+
 const categories: Array<{ id: Category; label: string }> = [
   { id: "all", label: "All Blueprints" },
   { id: "marketing", label: "Marketing Automation" },
@@ -18,7 +43,7 @@ const categories: Array<{ id: Category; label: string }> = [
   { id: "devops", label: "DevOps Agents" },
 ];
 
-const templates = [
+const templates: Template[] = [
   {
     id: "lead-nurture",
     category: "marketing",
@@ -28,6 +53,42 @@ const templates = [
     metricValue: "+85%",
     description:
       "Cluster multi-agente para identificar, calificar y nutrir leads en Email, LinkedIn y canales de mensajería.",
+    definition: {
+      version: "1.0",
+      entryNodeId: "marketing-trigger",
+      nodes: [
+        {
+          id: "marketing-trigger",
+          label: "Lead intake",
+          executor: "n8n",
+          config: {
+            webhookPathOrUrl: "/webhook/agents/marketing-lead-intake",
+            payload: { source: "landing", campaign: "omni-channel" },
+          },
+        },
+        {
+          id: "marketing-strategy",
+          label: "Estrategia de nurturing",
+          executor: "claw",
+          config: {
+            instructions:
+              "Diseña secuencia de nurturing de 3 pasos para convertir el lead en oportunidad de venta.",
+          },
+        },
+        {
+          id: "marketing-dispatch",
+          label: "Activar secuencia",
+          executor: "n8n",
+          config: {
+            webhookPathOrUrl: "/webhook/agents/marketing-dispatch-sequence",
+          },
+        },
+      ],
+      edges: [
+        { from: "marketing-trigger", to: "marketing-strategy" },
+        { from: "marketing-strategy", to: "marketing-dispatch" },
+      ],
+    },
   },
   {
     id: "support-scale",
@@ -38,6 +99,41 @@ const templates = [
     metricValue: "12x",
     description:
       "Automatiza triage, clasificación y redacción asistida para equipos de soporte de alto volumen.",
+    definition: {
+      version: "1.0",
+      entryNodeId: "support-trigger",
+      nodes: [
+        {
+          id: "support-trigger",
+          label: "Ticket intake",
+          executor: "n8n",
+          config: {
+            webhookPathOrUrl: "/webhook/agents/support-ticket-intake",
+          },
+        },
+        {
+          id: "support-priority",
+          label: "Priorización IA",
+          executor: "claw",
+          config: {
+            instructions:
+              "Clasifica el ticket por urgencia e impacto, y sugiere respuesta inicial.",
+          },
+        },
+        {
+          id: "support-routing",
+          label: "Routing de equipo",
+          executor: "n8n",
+          config: {
+            webhookPathOrUrl: "/webhook/agents/support-route-team",
+          },
+        },
+      ],
+      edges: [
+        { from: "support-trigger", to: "support-priority" },
+        { from: "support-priority", to: "support-routing" },
+      ],
+    },
   },
   {
     id: "sales-accelerator",
@@ -48,17 +144,160 @@ const templates = [
     metricValue: "+40%",
     description:
       "Integra CRM y playbooks de outreach para detección de prospectos con alta intención y follow-up.",
+    definition: {
+      version: "1.0",
+      entryNodeId: "sales-trigger",
+      nodes: [
+        {
+          id: "sales-trigger",
+          label: "Nuevo lead CRM",
+          executor: "n8n",
+          config: {
+            webhookPathOrUrl: "/webhook/agents/sales-lead-intake",
+          },
+        },
+        {
+          id: "sales-score",
+          label: "Lead scoring IA",
+          executor: "claw",
+          config: {
+            instructions:
+              "Puntua este lead B2B de 0 a 100 usando fit, urgencia y presupuesto; sugiere siguiente acción.",
+          },
+        },
+        {
+          id: "sales-followup",
+          label: "Follow-up automático",
+          executor: "n8n",
+          config: {
+            webhookPathOrUrl: "/webhook/agents/sales-followup-dispatch",
+          },
+        },
+      ],
+      edges: [
+        { from: "sales-trigger", to: "sales-score" },
+        { from: "sales-score", to: "sales-followup" },
+      ],
+    },
   },
 ];
 
 export default function WorkflowsPage() {
   const [activeCategory, setActiveCategory] = useState<Category>("all");
   const [view, setView] = useState<"library" | "builder">("library");
+  const [isCreatingScratch, setIsCreatingScratch] = useState(false);
+  const [deployingTemplateId, setDeployingTemplateId] = useState<string | null>(
+    null,
+  );
+  const [statusMessage, setStatusMessage] = useState<string>("");
+  const [statusType, setStatusType] = useState<"idle" | "ok" | "error">("idle");
 
   const visibleTemplates =
     activeCategory === "all"
       ? templates
       : templates.filter((template) => template.category === activeCategory);
+
+  async function createWorkflow(payload: {
+    nombre: string;
+    descripcion: string;
+    categoria: Exclude<Category, "all"> | "general";
+    isTemplate: boolean;
+    definition: WorkflowDefinition;
+  }) {
+    const response = await fetch("/api/workflows", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...payload,
+        estado: "draft",
+        createdBy: "ui-workflows",
+      }),
+    });
+
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string;
+      workflow?: { id: string; nombre: string };
+    };
+
+    if (!response.ok || !data.workflow) {
+      throw new Error(data.error ?? "No se pudo crear el workflow.");
+    }
+
+    return data.workflow;
+  }
+
+  async function handleDeployTemplate(template: Template) {
+    try {
+      setDeployingTemplateId(template.id);
+      setStatusType("idle");
+      setStatusMessage("");
+
+      const created = await createWorkflow({
+        nombre: template.title,
+        descripcion: template.description,
+        categoria: template.category,
+        isTemplate: true,
+        definition: template.definition,
+      });
+
+      setStatusType("ok");
+      setStatusMessage(
+        `Template desplegado: ${created.nombre}. ID: ${created.id}`,
+      );
+      setView("builder");
+    } catch (error) {
+      setStatusType("error");
+      setStatusMessage(
+        error instanceof Error
+          ? error.message
+          : "No se pudo desplegar el template.",
+      );
+    } finally {
+      setDeployingTemplateId(null);
+    }
+  }
+
+  async function handleCreateFromScratch() {
+    try {
+      setIsCreatingScratch(true);
+      setStatusType("idle");
+      setStatusMessage("");
+
+      const created = await createWorkflow({
+        nombre: "Workflow en blanco",
+        descripcion:
+          "Workflow base creado desde la libreria para construir flujo personalizado.",
+        categoria: "general",
+        isTemplate: false,
+        definition: {
+          version: "1.0",
+          entryNodeId: "start",
+          nodes: [
+            {
+              id: "start",
+              label: "Inicio",
+              executor: "agent",
+              config: { note: "Configurar primer nodo funcional" },
+            },
+          ],
+          edges: [],
+        },
+      });
+
+      setStatusType("ok");
+      setStatusMessage(`Workflow base creado. ID: ${created.id}`);
+      setView("builder");
+    } catch (error) {
+      setStatusType("error");
+      setStatusMessage(
+        error instanceof Error
+          ? error.message
+          : "No se pudo crear workflow base.",
+      );
+    } finally {
+      setIsCreatingScratch(false);
+    }
+  }
 
   return (
     <main className="landing-bg min-h-screen px-4 py-8 text-slate-100 md:px-8 xl:px-10">
@@ -113,8 +352,12 @@ export default function WorkflowsPage() {
                   Máxima eficiencia, mínima fricción operativa.
                 </p>
               </div>
-              <button className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400">
-                + Create from Scratch
+              <button
+                onClick={handleCreateFromScratch}
+                disabled={isCreatingScratch}
+                className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isCreatingScratch ? "Creando..." : "+ Create from Scratch"}
               </button>
             </div>
 
@@ -133,6 +376,18 @@ export default function WorkflowsPage() {
                 </button>
               ))}
             </div>
+
+            {statusType !== "idle" && statusMessage && (
+              <div
+                className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
+                  statusType === "ok"
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
+                    : "border-rose-500/40 bg-rose-500/10 text-rose-200"
+                }`}
+              >
+                {statusMessage}
+              </div>
+            )}
 
             <div className="mt-7 grid gap-4 lg:grid-cols-3">
               {visibleTemplates.map((template) => (
@@ -157,8 +412,14 @@ export default function WorkflowsPage() {
                   <p className="mt-4 text-sm leading-6 text-slate-300">
                     {template.description}
                   </p>
-                  <button className="mt-6 rounded-lg border border-orange-500/30 px-3 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/15">
-                    Deploy Template &rarr;
+                  <button
+                    onClick={() => handleDeployTemplate(template)}
+                    disabled={deployingTemplateId === template.id}
+                    className="mt-6 rounded-lg border border-orange-500/30 px-3 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/15 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {deployingTemplateId === template.id
+                      ? "Desplegando..."
+                      : "Deploy Template ->"}
                   </button>
                 </article>
               ))}
