@@ -1,4 +1,5 @@
 import { AgentCanvas } from "@/components/agent-canvas";
+import { HeroGeometry } from "@/components/hero-geometry";
 import { agentesPrincipales, estadoColor, type Agent } from "@/lib/agents";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -48,72 +49,106 @@ export default async function Home() {
   return (
     <main className="landing-bg min-h-screen px-4 py-10 text-slate-100 md:px-8 xl:px-12">
       <section className="mx-auto w-full max-w-[1600px] space-y-10">
-        <nav className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-2xl px-5 py-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">
-              Agentes Matrix
-            </p>
-            <p className="text-sm text-slate-300">
-              OpenClaw + n8n + Supabase
-            </p>
+        <nav className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-2xl border-orange-500/20 px-5 py-3">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-orange-500/90 text-sm font-black text-slate-950">
+              *
+            </span>
+            <p className="text-sm font-semibold tracking-wide">AGENTS MATRIX</p>
+          </div>
+          <div className="hidden items-center gap-7 text-sm text-slate-300 lg:flex">
+            <a className="transition hover:text-white" href="#workflows">
+              Workflows
+            </a>
+            <a className="transition hover:text-white" href="#agentes">
+              Agentes
+            </a>
+            <a className="transition hover:text-white" href="#arquitectura">
+              Arquitectura
+            </a>
+            <a className="transition hover:text-white" href="#logs">
+              Logs
+            </a>
           </div>
           <div className="flex items-center gap-2">
-            <button className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-800/80">
-              Ver Demo
-            </button>
             <Link
               href="/panel"
-              className="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-medium text-emerald-950 transition hover:bg-emerald-400"
+              className="rounded-lg border border-orange-500/40 bg-orange-500/15 px-4 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/25"
             >
-              Entrar al Panel
+              Acceso sistema
             </Link>
           </div>
         </nav>
 
-        <header className="grid gap-6 xl:grid-cols-12">
-          <div className="space-y-5 xl:col-span-8">
-            <p className="text-sm uppercase tracking-[0.2em] text-cyan-300">
-              Workflows Inteligentes
+        <header className="grid gap-8 border-t border-orange-500/15 pt-8 xl:grid-cols-12">
+          <div className="space-y-6 xl:col-span-7">
+            <p className="inline-flex rounded-full border border-orange-500/35 bg-orange-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-orange-300">
+              V 4.0 Protocolo activo
             </p>
-            <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
-              Interfaz visual para coordinar tu sistema multiagente jerarquico
+            <h1 className="max-w-3xl text-4xl font-semibold leading-[1.02] md:text-6xl">
+              Orquestación de{" "}
+              <span className="bg-gradient-to-r from-orange-400 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
+                Sistemas Multi-Agente
+              </span>{" "}
+              de Próxima Generación
             </h1>
-            <p className="max-w-2xl text-base leading-7 text-slate-300">
-              Diseña, monitorea y escala agentes como CLAW, NOVA y PULSE desde
-              una sola vista. Mapea tareas, delegacion y ejecucion con una
-              experiencia de producto estilo landing premium.
+            <p className="max-w-2xl text-lg leading-8 text-slate-300">
+              Diseña, monitorea y escala jerarquías de IA complejas con CLAW,
+              NOVA y PULSE. Productividad y autonomía sin límites para equipos
+              de ingeniería de datos.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/panel/workflows/nuevo"
-                className="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400"
               >
-                Crear workflow
+                Desplegar agentes
               </Link>
-              <button className="rounded-xl border border-slate-700 bg-slate-900/40 px-5 py-3 text-sm text-slate-200 transition hover:bg-slate-800/70">
-                Explorar arquitectura
-              </button>
+              <a
+                href="#arquitectura"
+                className="rounded-xl border border-slate-700 bg-slate-900/40 px-5 py-3 text-sm text-slate-200 transition hover:bg-slate-800/70"
+              >
+                Ver documentación
+              </a>
+            </div>
+
+            <div className="grid max-w-2xl gap-3 border-t border-slate-700/60 pt-5 sm:grid-cols-3">
+              <article>
+                <p className="text-3xl font-semibold">99.9%</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Uptime sincrónico</p>
+              </article>
+              <article>
+                <p className="text-3xl font-semibold">4ms</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Latencia nodo</p>
+              </article>
+              <article>
+                <p className="text-3xl font-semibold">10k+</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Agentes activos</p>
+              </article>
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:col-span-4 xl:grid-cols-2">
-            <article className="glass-panel rounded-2xl p-4">
-              <p className="text-sm text-slate-400">Agentes principales</p>
-              <p className="mt-2 text-3xl font-semibold">{agents.length}</p>
-            </article>
-            <article className="glass-panel rounded-2xl p-4">
-              <p className="text-sm text-slate-400">Subagentes</p>
-              <p className="mt-2 text-3xl font-semibold">{totalSubagentes}</p>
-            </article>
-            <article className="glass-panel rounded-2xl p-4 sm:col-span-2">
-              <p className="text-sm text-slate-400">Integraciones</p>
-              <p className="mt-2 text-lg font-semibold">OpenClaw + n8n + Supabase</p>
-            </article>
+          <div className="space-y-4 xl:col-span-5">
+            <HeroGeometry />
+            <div className="grid gap-4 sm:grid-cols-3">
+              <article className="glass-panel rounded-xl p-4">
+                <p className="text-sm text-slate-400">Agentes principales</p>
+                <p className="mt-2 text-3xl font-semibold">{agents.length}</p>
+              </article>
+              <article className="glass-panel rounded-xl p-4">
+                <p className="text-sm text-slate-400">Subagentes</p>
+                <p className="mt-2 text-3xl font-semibold">{totalSubagentes}</p>
+              </article>
+              <article className="glass-panel rounded-xl p-4">
+                <p className="text-sm text-slate-400">Integraciones</p>
+                <p className="mt-2 text-lg font-semibold">OpenClaw + n8n + Supabase</p>
+              </article>
+            </div>
           </div>
         </header>
 
-        <section className="space-y-3">
-            <div className="flex flex-wrap items-end justify-between gap-2">
+        <section id="workflows" className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
               <p className="text-sm uppercase tracking-[0.18em] text-emerald-300">
                 Workflows
@@ -127,7 +162,7 @@ export default async function Home() {
           <AgentCanvas agents={agents} />
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
+        <section id="arquitectura" className="grid gap-4 md:grid-cols-3">
           <article className="glass-panel rounded-2xl p-5">
             <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">
               Diseñador de agentes
@@ -160,12 +195,9 @@ export default async function Home() {
           </article>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-3">
+        <section id="agentes" className="grid gap-4 lg:grid-cols-3">
           {agents.map((agente) => (
-            <article
-              key={agente.id}
-              className="glass-panel space-y-4 rounded-2xl border border-slate-800 p-5"
-            >
+            <article key={agente.id} className="glass-panel space-y-4 rounded-2xl border border-slate-800 p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-xl font-semibold">{agente.nombre}</h3>
