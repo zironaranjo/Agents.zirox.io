@@ -38,11 +38,25 @@ export async function delegateToClaw(payload: DelegateToClawInput) {
   const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
 
   if (!response.ok) {
-    const message =
+    const allowHeader = response.headers.get("allow");
+    const rawDetail =
       typeof data?.error === "string"
         ? data.error
-        : `CLAW devolvio status ${response.status}`;
-    throw new Error(message);
+        : typeof data?.message === "string"
+          ? data.message
+          : JSON.stringify(data);
+
+    const details = [
+      `CLAW devolvio status ${response.status}.`,
+      `Endpoint probado: ${endpoint}`,
+      "Metodo enviado: POST",
+      allowHeader ? `Metodos permitidos: ${allowHeader}` : "",
+      rawDetail ? `Detalle: ${rawDetail}` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    throw new Error(details);
   }
 
   return data;
