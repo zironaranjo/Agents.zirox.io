@@ -53,9 +53,9 @@ export default async function Home() {
             <p className="text-sm font-semibold tracking-wide">AGENTS MATRIX</p>
           </div>
           <div className="hidden items-center gap-7 text-sm text-slate-300 lg:flex">
-            <a className="transition hover:text-white" href="#workflows">
+            <Link className="transition hover:text-white" href="/workflows">
               Workflows
-            </a>
+            </Link>
             <a className="transition hover:text-white" href="#agentes">
               Agentes
             </a>
@@ -95,10 +95,10 @@ export default async function Home() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/panel/workflows/nuevo"
+                href="/workflows"
                 className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400"
               >
-                Desplegar agentes
+                Crear workflow
               </Link>
               <a
                 href="#arquitectura"
