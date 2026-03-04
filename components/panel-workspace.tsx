@@ -102,8 +102,8 @@ export function PanelWorkspace() {
   };
 
   return (
-    <section className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
-      <aside className="glass-panel rounded-2xl p-4">
+    <section className="grid gap-4 lg:grid-cols-12">
+      <aside className="glass-panel rounded-2xl p-4 lg:col-span-3 lg:max-h-[78vh] lg:overflow-auto">
         <div className="mb-4 flex items-center justify-between gap-2">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Workspace</p>
@@ -117,7 +117,7 @@ export function PanelWorkspace() {
           </button>
         </div>
 
-        <div className="max-h-[70vh] space-y-2 overflow-auto pr-1">
+        <div className="space-y-2 pr-1">
           {agents.map((agent) => {
             const isSelected = selectedId === agent.id;
             return (
@@ -145,7 +145,7 @@ export function PanelWorkspace() {
         </div>
       </aside>
 
-      <article className="glass-panel rounded-2xl p-5">
+      <article className="glass-panel rounded-2xl p-5 lg:col-span-5 lg:max-h-[78vh] lg:overflow-auto">
         {!selectedAgent ? (
           <p className="text-sm text-slate-300">Selecciona un agente para editarlo.</p>
         ) : (
@@ -263,7 +263,7 @@ export function PanelWorkspace() {
                 <textarea
                   value={selectedAgent.systemPrompt}
                   onChange={(event) => updateSelectedAgent({ systemPrompt: event.target.value })}
-                  rows={4}
+                  rows={5}
                   className={baseFieldClass}
                 />
               </label>
@@ -286,45 +286,6 @@ export function PanelWorkspace() {
               </label>
             </section>
 
-            <section className="space-y-3 rounded-xl border border-cyan-400/25 bg-cyan-500/5 p-4">
-              <h3 className="text-sm font-semibold text-cyan-200">Prueba rápida de agente</h3>
-              <textarea
-                value={testPrompt}
-                onChange={(event) => setTestPrompt(event.target.value)}
-                rows={4}
-                className={baseFieldClass}
-                placeholder="Escribe una tarea para validar el agente..."
-              />
-              <div className="flex items-center justify-between gap-2">
-                <button
-                  onClick={runAgentTest}
-                  disabled={isRunning}
-                  className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isRunning ? "Ejecutando..." : "Probar agente"}
-                </button>
-                <p className="text-xs text-slate-400">
-                  Consejo: usa prompts cortos para reducir costo de tokens.
-                </p>
-              </div>
-
-              {error ? (
-                <div className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-3">
-                  <p className="text-xs uppercase tracking-[0.16em] text-rose-300">Error</p>
-                  <p className="mt-1 text-sm text-rose-200">{error}</p>
-                </div>
-              ) : null}
-
-              {respuesta ? (
-                <div className="rounded-lg border border-emerald-400/25 bg-emerald-500/5 p-3">
-                  <p className="text-xs uppercase tracking-[0.16em] text-emerald-300">Respuesta</p>
-                  <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-sm text-slate-100">
-                    {respuesta}
-                  </pre>
-                </div>
-              ) : null}
-            </section>
-
             <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
               Siguiente paso: conectar este editor a Supabase para persistir configuración por
               agente.
@@ -332,6 +293,61 @@ export function PanelWorkspace() {
           </div>
         )}
       </article>
+
+      <aside className="glass-panel rounded-2xl p-5 lg:col-span-4 lg:max-h-[78vh] lg:overflow-auto">
+        {!selectedAgent ? (
+          <p className="text-sm text-slate-300">Selecciona un agente para iniciar una prueba.</p>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Testing</p>
+              <h3 className="text-lg font-semibold">Prueba rápida de agente</h3>
+              <p className="text-sm text-slate-300">
+                Ejecuta prompts de validación sin salir del panel.
+              </p>
+            </div>
+
+            <textarea
+              value={testPrompt}
+              onChange={(event) => setTestPrompt(event.target.value)}
+              rows={7}
+              className={baseFieldClass}
+              placeholder="Escribe una tarea para validar el agente..."
+            />
+
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <button
+                onClick={runAgentTest}
+                disabled={isRunning}
+                className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isRunning ? "Ejecutando..." : "Probar agente"}
+              </button>
+              <p className="text-xs text-slate-400">Usa prompts cortos para bajar costo.</p>
+            </div>
+
+            {error ? (
+              <div className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-rose-300">Error</p>
+                <p className="mt-1 text-sm text-rose-200">{error}</p>
+              </div>
+            ) : null}
+
+            {respuesta ? (
+              <div className="rounded-lg border border-emerald-400/25 bg-emerald-500/5 p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-emerald-300">Respuesta</p>
+                <pre className="mt-2 max-h-[38vh] overflow-auto whitespace-pre-wrap text-sm text-slate-100">
+                  {respuesta}
+                </pre>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-slate-700 bg-slate-900/50 p-3 text-sm text-slate-300">
+                La respuesta aparecerá aquí después de ejecutar la prueba.
+              </div>
+            )}
+          </div>
+        )}
+      </aside>
     </section>
   );
 }
