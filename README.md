@@ -61,6 +61,9 @@ Nota de configuración CLAW:
 - Opción A: usar `CLAW_API_URL` + `CLAW_DELEGATE_PATH`.
 - Opción B (preferida cuando no conoces el path): usar `CLAW_DELEGATE_URL` con URL completa.
 - Si `CLAW_DELEGATE_URL` existe, tiene prioridad sobre las otras dos.
+- Para OpenClaw Gateway por `tools/invoke`, usa:
+  - `CLAW_DELEGATE_URL=https://claw.zirox.io/tools/invoke`
+  - y asegúrate de permitir `sessions_spawn` en la configuración del gateway HTTP.
 
 ## Próximos pasos
 

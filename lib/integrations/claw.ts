@@ -26,16 +26,52 @@ export async function delegateToClaw(payload: DelegateToClawInput) {
         return `${baseUrl.replace(/\/$/, "")}${delegatePath.startsWith("/") ? delegatePath : `/${delegatePath}`}`;
       })();
 
+  const sessionKey = process.env.CLAW_SESSION_KEY ?? "main";
+  const runtime = process.env.CLAW_RUNTIME ?? "subagent";
+  const mode = process.env.CLAW_MODE ?? "run";
+  const runTimeoutSeconds = Number(process.env.CLAW_RUN_TIMEOUT_SECONDS ?? 300);
+
+  const taskContext =
+    payload.input || payload.context
+      ? `\n\nContexto JSON:\n${JSON.stringify(
+          {
+            taskId: payload.taskId,
+            input: payload.input ?? null,
+            context: payload.context ?? {},
+          },
+          null,
+          2,
+        )}`
+      : "";
+
+  const requestBody = {
+    tool: "sessions_spawn",
+    args: {
+      task: `${payload.instructions}${taskContext}`,
+      runtime,
+      mode,
+      runTimeoutSeconds,
+      ...(payload.agentId ? { agentId: payload.agentId } : {}),
+    },
+    sessionKey,
+  };
+
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(requestBody),
   });
 
-  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+  const rawText = await response.text();
+  let data: Record<string, unknown> = {};
+  try {
+    data = rawText ? (JSON.parse(rawText) as Record<string, unknown>) : {};
+  } catch {
+    data = rawText ? { raw: rawText } : {};
+  }
 
   if (!response.ok) {
     const allowHeader = response.headers.get("allow");
