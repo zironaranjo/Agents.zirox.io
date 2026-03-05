@@ -107,16 +107,30 @@ export default async function Home() {
 
           <article className="relative overflow-hidden bg-slate-950">
             <div className="relative min-h-[92vh] w-full">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_42%,rgba(251,146,60,0.18),transparent_46%),radial-gradient(circle_at_78%_32%,rgba(34,211,238,0.14),transparent_38%),linear-gradient(180deg,#020617_0%,#020617_100%)]" />
+
               <Image
                 src="/Claw.png"
-                alt="CLAW orquestador principal"
+                alt="CLAW entorno de fondo"
                 fill
-                className="object-cover object-top"
+                className="object-cover object-top opacity-25 blur-[2px] saturate-70"
                 sizes="100vw"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/60 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/10" />
+
+              <div className="absolute inset-y-0 right-0 hidden w-[60vw] md:block">
+                <Image
+                  src="/Claw1.png"
+                  alt="CLAW primer plano"
+                  fill
+                  className="object-contain object-bottom [mask-image:linear-gradient(to_top,black_78%,transparent_100%)]"
+                  sizes="60vw"
+                  priority
+                />
+              </div>
+
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/96 via-slate-950/68 to-slate-950/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/94 via-transparent to-slate-950/10" />
 
               <div className="relative z-10 flex h-full max-w-2xl flex-col justify-end gap-5 p-6 md:p-10 xl:ml-8">
                 <p className="inline-flex w-fit rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-orange-300">
