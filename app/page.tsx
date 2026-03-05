@@ -97,17 +97,11 @@ export default async function Home() {
               </p>
               <h2 className="text-2xl font-semibold">CLAW · núcleo orquestador</h2>
             </div>
-            <Link
-              href="/panel/agentes"
-              className="rounded-lg border border-orange-500/40 bg-orange-500/15 px-4 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/25"
-            >
-              Acceso sistema
-            </Link>
           </div>
 
           <article className="relative overflow-hidden bg-slate-950">
             <div className="relative min-h-[92vh] w-full">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_42%,rgba(251,146,60,0.18),transparent_46%),radial-gradient(circle_at_78%_32%,rgba(34,211,238,0.14),transparent_38%),linear-gradient(180deg,#020617_0%,#020617_100%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(30,58,138,0.14),transparent_48%),linear-gradient(180deg,#020617_0%,#020617_100%)]" />
 
               <Image
                 src="/Claw.png"
@@ -129,10 +123,10 @@ export default async function Home() {
                 />
               </div>
 
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/96 via-slate-950/68 to-slate-950/20" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/88 via-slate-950/58 to-slate-950/24" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/94 via-transparent to-slate-950/10" />
 
-              <div className="relative z-10 flex h-full max-w-2xl flex-col justify-end gap-5 p-6 md:p-10 xl:ml-8">
+              <div className="relative z-10 flex h-full max-w-2xl flex-col justify-end gap-5 p-6 md:p-10 lg:ml-14 xl:ml-24">
                 <p className="inline-flex w-fit rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-orange-300">
                   CLAW online
                 </p>
