@@ -493,7 +493,7 @@ export default function WorkflowsPage() {
                 <div className="space-y-1">
                   {section.items.map((item) => (
                     <button
-                      key={item}
+                      key={item.id}
                       draggable
                       onDragStart={() => handlePaletteDragStart(item)}
                       className="w-full rounded-lg border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-300 transition hover:border-blue-500/40 hover:bg-blue-500/10"
