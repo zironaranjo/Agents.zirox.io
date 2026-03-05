@@ -45,6 +45,7 @@ const featuredAgents = [
     id: "claw",
     nombre: "CLAW",
     imagen: "/Claw.png",
+    imageClassName: "object-cover object-center",
     subtitulo: "Orquestador principal",
     capacidades: [
       "Coordina tareas entre NOVA y PULSE con delegacion trazable.",
@@ -56,6 +57,7 @@ const featuredAgents = [
     id: "nova",
     nombre: "NOVA",
     imagen: "/Nova.png",
+    imageClassName: "object-contain object-top",
     subtitulo: "Marketing y crecimiento",
     capacidades: [
       "Genera contenido y campañas para canales sociales.",
@@ -67,6 +69,7 @@ const featuredAgents = [
     id: "pulse",
     nombre: "PULSE",
     imagen: "/Pulse.png",
+    imageClassName: "object-contain object-top",
     subtitulo: "Ventas y prospeccion",
     capacidades: [
       "Prioriza leads y organiza pipeline comercial.",
@@ -243,11 +246,12 @@ export default async function Home() {
                   className="glass-panel flex h-full flex-col overflow-hidden rounded-2xl border border-slate-800"
                 >
                   <div className="relative h-[460px] w-full">
+                    <div className="absolute inset-0 bg-slate-950" />
                     <Image
                       src={item.imagen}
                       alt={`Agente ${item.nombre}`}
                       fill
-                      className="object-cover object-center"
+                      className={item.imageClassName}
                       sizes="(max-width: 1024px) 100vw, 33vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
