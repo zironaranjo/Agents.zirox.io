@@ -57,7 +57,7 @@ const featuredAgents = [
     id: "nova",
     nombre: "NOVA",
     imagen: "/Nova.png",
-    imageClassName: "object-contain object-top scale-110",
+    imageClassName: "object-contain object-top scale-125",
     subtitulo: "Marketing y crecimiento",
     capacidades: [
       "Genera contenido y campañas para canales sociales.",
