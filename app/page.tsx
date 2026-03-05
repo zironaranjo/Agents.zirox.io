@@ -105,13 +105,13 @@ export default async function Home() {
             </Link>
           </div>
 
-          <article className="relative overflow-hidden border-y border-orange-500/25 bg-slate-950 md:mx-6 md:rounded-3xl md:border md:border-orange-500/25 xl:mx-10">
-            <div className="relative min-h-[90vh] w-full">
+          <article className="relative overflow-hidden bg-slate-950">
+            <div className="relative min-h-[92vh] w-full">
               <Image
                 src="/Claw.png"
                 alt="CLAW orquestador principal"
                 fill
-                className="object-cover object-center"
+                className="object-cover object-top"
                 sizes="100vw"
                 priority
               />
