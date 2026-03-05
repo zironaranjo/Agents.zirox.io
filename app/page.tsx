@@ -240,9 +240,9 @@ export default async function Home() {
               return (
                 <article
                   key={item.id}
-                  className="glass-panel overflow-hidden rounded-2xl border border-slate-800"
+                  className="glass-panel flex h-full flex-col overflow-hidden rounded-2xl border border-slate-800"
                 >
-                  <div className="relative aspect-[4/5]">
+                  <div className="relative h-[460px] w-full">
                     <Image
                       src={item.imagen}
                       alt={`Agente ${item.nombre}`}
@@ -264,7 +264,7 @@ export default async function Home() {
                     </div>
                   </div>
 
-                  <div className="space-y-4 p-5">
+                  <div className="flex-1 space-y-4 p-5">
                     <div>
                       <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
                         Capacidades
