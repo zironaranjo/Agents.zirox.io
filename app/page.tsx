@@ -107,18 +107,18 @@ export default async function Home() {
                 src="/Claw.png"
                 alt="CLAW entorno de fondo"
                 fill
-                className="object-cover object-top opacity-25 blur-[2px] saturate-70"
+                className="object-cover object-top opacity-10 blur-[3px] saturate-60"
                 sizes="100vw"
                 priority
               />
 
-              <div className="absolute inset-y-0 right-0 hidden w-[54vw] md:block">
+              <div className="absolute inset-y-0 right-0 hidden w-[68vw] md:block">
                 <Image
                   src="/Claw1.png"
                   alt="CLAW primer plano"
                   fill
-                  className="object-contain object-center drop-shadow-[0_14px_34px_rgba(0,0,0,0.5)]"
-                  sizes="60vw"
+                  className="object-contain object-bottom drop-shadow-[0_20px_48px_rgba(0,0,0,0.62)]"
+                  sizes="68vw"
                   priority
                 />
               </div>
