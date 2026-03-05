@@ -103,18 +103,18 @@ export default async function Home() {
             <div className="relative min-h-[92vh] w-full">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(15,118,110,0.18),transparent_42%),radial-gradient(circle_at_18%_28%,rgba(251,146,60,0.18),transparent_38%),linear-gradient(180deg,#020617_0%,#020617_100%)]" />
 
-              <div className="absolute inset-y-0 -right-[8vw] hidden w-[88vw] md:block lg:-right-[6vw] lg:w-[82vw]">
+              <div className="absolute inset-y-0 right-0 hidden w-[66vw] md:block lg:w-[60vw]">
                 <Image
                   src="/Claw1.png"
                   alt="CLAW primer plano"
                   fill
-                  className="object-contain object-bottom brightness-110 contrast-110 drop-shadow-[0_24px_56px_rgba(0,0,0,0.7)] scale-[1.08]"
-                  sizes="88vw"
+                  className="origin-bottom object-contain object-bottom brightness-110 contrast-110 drop-shadow-[0_24px_56px_rgba(0,0,0,0.7)] scale-[1.16]"
+                  sizes="66vw"
                   priority
                 />
               </div>
 
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/84 via-slate-950/44 to-slate-950/12" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/78 via-slate-950/35 to-slate-950/8" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/94 via-transparent to-slate-950/10" />
 
               <div className="relative z-10 flex h-full max-w-2xl flex-col justify-end gap-5 p-6 md:p-10 lg:ml-14 xl:ml-24">
