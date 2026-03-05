@@ -2,6 +2,7 @@ import { AgentCanvas } from "@/components/agent-canvas";
 import { HeroGeometry } from "@/components/hero-geometry";
 import { agentesPrincipales, estadoColor, type Agent } from "@/lib/agents";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import Image from "next/image";
 import Link from "next/link";
 
 async function getAgentsForLanding() {
@@ -39,8 +40,45 @@ async function getAgentsForLanding() {
   }
 }
 
+const featuredAgents = [
+  {
+    id: "claw",
+    nombre: "CLAW",
+    imagen: "/Claw.png",
+    subtitulo: "Orquestador principal",
+    capacidades: [
+      "Coordina tareas entre NOVA y PULSE con delegacion trazable.",
+      "Dispara ejecuciones en n8n y controla estados por run.",
+      "Centraliza reglas, contexto y estrategia de workflow.",
+    ],
+  },
+  {
+    id: "nova",
+    nombre: "NOVA",
+    imagen: "/Nova.png",
+    subtitulo: "Marketing y crecimiento",
+    capacidades: [
+      "Genera contenido y campañas para canales sociales.",
+      "Activa automatizaciones de publicacion via n8n.",
+      "Analiza engagement, alcance y oportunidades de optimizacion.",
+    ],
+  },
+  {
+    id: "pulse",
+    nombre: "PULSE",
+    imagen: "/Pulse.png",
+    subtitulo: "Ventas y prospeccion",
+    capacidades: [
+      "Prioriza leads y organiza pipeline comercial.",
+      "Ejecuta seguimientos y tareas CRM con n8n.",
+      "Convierte output de agentes en acciones de cierre.",
+    ],
+  },
+] as const;
+
 export default async function Home() {
   const agents = await getAgentsForLanding();
+  const agentsById = new Map(agents.map((agent) => [agent.id.toLowerCase(), agent]));
 
   return (
     <main className="landing-bg min-h-screen px-4 py-10 text-slate-100 md:px-8 xl:px-12">
@@ -177,37 +215,92 @@ export default async function Home() {
           </article>
         </section>
 
-        <section id="agentes" className="grid gap-4 lg:grid-cols-3">
-          {agents.map((agente) => (
-            <article key={agente.id} className="glass-panel space-y-4 rounded-2xl border border-slate-800 p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-xl font-semibold">{agente.nombre}</h3>
-                  <p className="text-sm text-slate-300">{agente.rol}</p>
-                </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${estadoColor[agente.estado]}`}
-                >
-                  {agente.estado}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {agente.herramientas.map((tool) => (
-                  <span
-                    key={tool}
-                    className="rounded-md border border-slate-700 bg-slate-800/70 px-2 py-1 text-xs text-slate-200"
-                  >
-                    {tool}
-                  </span>
-                ))}
-              </div>
-
-              <p className="text-sm text-slate-300">
-                Subagentes: {agente.subagentes.join(", ")}
+        <section id="agentes" className="space-y-4">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="text-sm uppercase tracking-[0.18em] text-cyan-300">
+                Agentes principales
               </p>
-            </article>
-          ))}
+              <h2 className="text-2xl font-semibold">CLAW · NOVA · PULSE</h2>
+            </div>
+            <p className="text-sm text-slate-300">
+              Núcleo operativo del sistema multiagente con enfoque en orquestacion,
+              marketing y ventas.
+            </p>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            {featuredAgents.map((item) => {
+              const runtimeAgent = agentsById.get(item.id);
+              const status = runtimeAgent?.estado ?? "idle";
+              const role = runtimeAgent?.rol ?? item.subtitulo;
+              const tools = runtimeAgent?.herramientas ?? [];
+              const workers = runtimeAgent?.subagentes ?? [];
+
+              return (
+                <article
+                  key={item.id}
+                  className="glass-panel overflow-hidden rounded-2xl border border-slate-800"
+                >
+                  <div className="relative aspect-[4/5]">
+                    <Image
+                      src={item.imagen}
+                      alt={`Agente ${item.nombre}`}
+                      fill
+                      className="object-cover object-center"
+                      sizes="(max-width: 1024px) 100vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="text-2xl font-semibold">{item.nombre}</h3>
+                        <span
+                          className={`rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-wide ${estadoColor[status]}`}
+                        >
+                          {status}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-200">{role}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 p-5">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
+                        Capacidades
+                      </p>
+                      <ul className="mt-2 space-y-2 text-sm text-slate-200">
+                        {item.capacidades.map((cap) => (
+                          <li key={cap}>- {cap}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
+                        Herramientas activas
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {tools.map((tool) => (
+                          <span
+                            key={tool}
+                            className="rounded-md border border-slate-700 bg-slate-800/70 px-2 py-1 text-xs text-slate-200"
+                          >
+                            {tool}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-slate-300">
+                      Workers vinculados:{" "}
+                      {workers.length > 0 ? workers.join(", ") : "Sin asignar"}
+                    </p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </section>
       </section>
     </main>
