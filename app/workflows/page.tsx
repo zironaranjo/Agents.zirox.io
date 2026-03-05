@@ -1,7 +1,35 @@
 "use client";
 
+import { Inter } from "next/font/google";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useRef, useState, type DragEvent } from "react";
+import {
+  Activity,
+  AtSign,
+  Bot,
+  CalendarClock,
+  CloudUpload,
+  Cog,
+  GitBranch,
+  ImagePlus,
+  Instagram,
+  Linkedin,
+  Plus,
+  Rocket,
+  Search,
+  Settings2,
+  Sparkles,
+  Video,
+  Webhook,
+  Workflow,
+  Youtube,
+  type LucideIcon,
+} from "lucide-react";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 type WorkflowNode = {
   id: string;
@@ -10,8 +38,13 @@ type WorkflowNode = {
   subtitle: string;
   x: number;
   y: number;
-  executor: "n8n" | "claw" | "social_api";
+  executor: "n8n" | "claw" | "social_api" | "agent";
   config: Record<string, unknown>;
+};
+
+type WorkflowEdge = {
+  from: string;
+  to: string;
 };
 
 type WorkflowDefinition = {
@@ -20,38 +53,164 @@ type WorkflowDefinition = {
   nodes: Array<{
     id: string;
     label: string;
-    executor: "n8n" | "claw" | "social_api";
+    executor: "n8n" | "claw" | "social_api" | "agent";
     config: Record<string, unknown>;
   }>;
-  edges: Array<{ from: string; to: string }>;
+  edges: WorkflowEdge[];
 };
 
-const paletteSections = [
+type PaletteItem = {
+  id: string;
+  group: "Triggers" | "Agents" | "Social Media" | "Automation";
+  label: string;
+  subtitle: string;
+  icon: LucideIcon;
+  type: WorkflowNode["type"];
+  executor: WorkflowNode["executor"];
+  config: Record<string, unknown>;
+};
+
+const paletteItems: PaletteItem[] = [
   {
-    title: "Triggers",
-    items: ["LinkedIn Mention", "Cron Schedule", "Webhook URL"],
+    id: "trigger-linkedin",
+    group: "Triggers",
+    label: "LinkedIn Mention",
+    subtitle: "Live feed trigger",
+    icon: Linkedin,
+    type: "trigger",
+    executor: "n8n",
+    config: { webhookPathOrUrl: "/webhook/linkedin-mention" },
   },
   {
-    title: "Agents",
-    items: ["Content Analyst", "Strategy Planner"],
+    id: "trigger-cron",
+    group: "Triggers",
+    label: "Cron Schedule",
+    subtitle: "Time-based trigger",
+    icon: CalendarClock,
+    type: "trigger",
+    executor: "n8n",
+    config: { cron: "0 9 * * *" },
   },
   {
-    title: "Social Media",
-    items: [
-      "Post to Instagram",
-      "Upload YouTube Video",
-      "Read TikTok Comments",
-      "Get LinkedIn Analytics",
-      "Post to Facebook",
-    ],
+    id: "trigger-webhook",
+    group: "Triggers",
+    label: "Webhook URL",
+    subtitle: "External event trigger",
+    icon: Webhook,
+    type: "trigger",
+    executor: "n8n",
+    config: { webhookPathOrUrl: "/webhook/external-event" },
   },
   {
-    title: "Automation",
-    items: ["n8n: Sync to CRM", "n8n: Publish Scheduler", "CapCut Render"],
+    id: "agent-analyst",
+    group: "Agents",
+    label: "Content Analyst",
+    subtitle: "Reasoning + strategy",
+    icon: Bot,
+    type: "agent",
+    executor: "claw",
+    config: {
+      instructions:
+        "Analiza contexto, genera caption y CTA orientado a conversion.",
+    },
+  },
+  {
+    id: "agent-planner",
+    group: "Agents",
+    label: "Strategy Planner",
+    subtitle: "Campaign planning",
+    icon: Sparkles,
+    type: "agent",
+    executor: "claw",
+    config: {
+      instructions: "Define estrategia de contenidos para 7 dias por canal.",
+    },
+  },
+  {
+    id: "social-instagram",
+    group: "Social Media",
+    label: "Instagram Post",
+    subtitle: "Publish media post",
+    icon: Instagram,
+    type: "social",
+    executor: "social_api",
+    config: { account: "@agent_workflow_main", caption: "{{agent_output}}" },
+  },
+  {
+    id: "social-youtube",
+    group: "Social Media",
+    label: "Upload YouTube Video",
+    subtitle: "Video publishing",
+    icon: Youtube,
+    type: "social",
+    executor: "social_api",
+    config: { channel: "main", title: "{{video_title}}" },
+  },
+  {
+    id: "social-tiktok",
+    group: "Social Media",
+    label: "Read TikTok Comments",
+    subtitle: "Engagement monitoring",
+    icon: Video,
+    type: "social",
+    executor: "social_api",
+    config: { mode: "comments" },
+  },
+  {
+    id: "social-linkedin-analytics",
+    group: "Social Media",
+    label: "Get LinkedIn Analytics",
+    subtitle: "Performance insights",
+    icon: Activity,
+    type: "social",
+    executor: "social_api",
+    config: { report: "weekly" },
+  },
+  {
+    id: "automation-n8n",
+    group: "Automation",
+    label: "n8n: Sync to CRM",
+    subtitle: "External automation",
+    icon: Workflow,
+    type: "automation",
+    executor: "n8n",
+    config: { webhookPathOrUrl: "/webhook/sync-crm" },
+  },
+  {
+    id: "automation-capcut",
+    group: "Automation",
+    label: "CapCut Render",
+    subtitle: "Video generation pipeline",
+    icon: ImagePlus,
+    type: "automation",
+    executor: "n8n",
+    config: { webhookPathOrUrl: "/webhook/capcut-render" },
   },
 ];
 
-const canvasNodes: WorkflowNode[] = [
+const paletteSections: Array<{
+  title: PaletteItem["group"];
+  items: PaletteItem[];
+}> = [
+  {
+    title: "Triggers",
+    items: paletteItems.filter((item) => item.group === "Triggers"),
+  },
+  {
+    title: "Agents",
+    items: paletteItems.filter((item) => item.group === "Agents"),
+  },
+  {
+    title: "Social Media",
+    items: paletteItems.filter((item) => item.group === "Social Media"),
+  },
+  {
+    title: "Automation",
+    items: paletteItems.filter((item) => item.group === "Automation"),
+  },
+];
+
+const initialCanvasNodes: WorkflowNode[] = [
   {
     id: "trigger-linkedin",
     type: "trigger",
@@ -102,23 +261,48 @@ const canvasNodes: WorkflowNode[] = [
   },
 ];
 
-const canvasEdges = [
+const initialCanvasEdges: WorkflowEdge[] = [
   { from: "trigger-linkedin", to: "agent-content" },
   { from: "agent-content", to: "n8n-sync" },
   { from: "agent-content", to: "social-ig" },
 ];
 
+function nodeIconForType(type: WorkflowNode["type"]) {
+  if (type === "trigger") return Sparkles;
+  if (type === "agent") return Bot;
+  if (type === "social") return AtSign;
+  return Workflow;
+}
+
 export default function WorkflowsPage() {
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedNodeId, setSelectedNodeId] = useState("social-ig");
   const [activeTab, setActiveTab] = useState<
     "editor" | "templates" | "logs" | "settings"
   >("editor");
   const [deploying, setDeploying] = useState(false);
+  const [nodes, setNodes] = useState<WorkflowNode[]>(initialCanvasNodes);
+  const [edges] = useState<WorkflowEdge[]>(initialCanvasEdges);
+  const [draggingItem, setDraggingItem] = useState<PaletteItem | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [statusType, setStatusType] = useState<"idle" | "ok" | "error">("idle");
 
   const selectedNode =
-    canvasNodes.find((node) => node.id === selectedNodeId) ?? canvasNodes[0];
+    nodes.find((node) => node.id === selectedNodeId) ?? nodes[0];
+
+  const filteredSections = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return paletteSections;
+    return paletteSections
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) =>
+          `${item.label} ${item.subtitle}`.toLowerCase().includes(query),
+        ),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [searchQuery]);
 
   async function createWorkflow(payload: {
     nombre: string;
@@ -157,14 +341,14 @@ export default function WorkflowsPage() {
 
       const definition: WorkflowDefinition = {
         version: "1.0",
-        entryNodeId: "trigger-linkedin",
-        nodes: canvasNodes.map((node) => ({
+        entryNodeId: nodes[0]?.id ?? "start",
+        nodes: nodes.map((node) => ({
           id: node.id,
           label: node.label,
           executor: node.executor,
           config: node.config,
         })),
-        edges: canvasEdges,
+        edges,
       };
 
       const created = await createWorkflow({
@@ -190,12 +374,59 @@ export default function WorkflowsPage() {
     }
   }
 
+  function handlePaletteDragStart(item: PaletteItem) {
+    setDraggingItem(item);
+  }
+
+  function handleCanvasDragOver(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+  }
+
+  function handleCanvasDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    if (!draggingItem || !canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const nextNode: WorkflowNode = {
+      id: `${draggingItem.id}-${Date.now()}`,
+      type: draggingItem.type,
+      label: draggingItem.label,
+      subtitle: draggingItem.subtitle,
+      x: Math.max(16, event.clientX - rect.left - 120),
+      y: Math.max(16, event.clientY - rect.top - 32),
+      executor: draggingItem.executor,
+      config: { ...draggingItem.config },
+    };
+
+    setNodes((prev) => [...prev, nextNode]);
+    setSelectedNodeId(nextNode.id);
+    setDraggingItem(null);
+  }
+
+  function edgePath(edge: WorkflowEdge) {
+    const source = nodes.find((node) => node.id === edge.from);
+    const target = nodes.find((node) => node.id === edge.to);
+    if (!source || !target) return null;
+
+    const sx = source.x + 250;
+    const sy = source.y + 50;
+    const tx = target.x;
+    const ty = target.y + 50;
+    const c1x = sx + 100;
+    const c2x = tx - 100;
+
+    return `M ${sx} ${sy} C ${c1x} ${sy}, ${c2x} ${ty}, ${tx} ${ty}`;
+  }
+
   return (
-    <main className="h-screen overflow-hidden bg-[#0b1022] text-slate-100">
+    <main
+      className={`h-screen overflow-hidden bg-[#0b1022] text-slate-100 ${inter.className}`}
+    >
       <header className="flex h-16 items-center justify-between border-b border-[#2a3556] bg-[#0f152a] px-4 md:px-6">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2 text-blue-400">
-            <span className="text-xl font-black">✦</span>
+            <GitBranch className="h-5 w-5" />
             <h1 className="text-base font-semibold">AI Agent Workflow Builder</h1>
           </div>
           <nav className="hidden items-center gap-5 md:flex">
@@ -218,6 +449,9 @@ export default function WorkflowsPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <button className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-slate-800/60 text-slate-200">
+            <span className="text-xs">🧑</span>
+          </button>
           <Link
             href="/"
             className="rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-xs text-slate-200 transition hover:bg-slate-800"
@@ -229,7 +463,10 @@ export default function WorkflowsPage() {
             disabled={deploying}
             className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {deploying ? "Desplegando..." : "Deploy Agent"}
+            <span className="inline-flex items-center gap-1">
+              <Rocket className="h-3.5 w-3.5" />
+              {deploying ? "Desplegando..." : "Deploy Agent"}
+            </span>
           </button>
         </div>
       </header>
@@ -237,13 +474,18 @@ export default function WorkflowsPage() {
       <section className="flex h-[calc(100vh-64px)]">
         <aside className="hidden w-72 flex-col border-r border-[#2a3556] bg-[#0d1327] lg:flex">
           <div className="p-4">
-            <input
-              className="w-full rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500"
-              placeholder="Search components..."
-            />
+            <label className="relative block">
+              <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="w-full rounded-lg border border-[#2a3556] bg-[#111a33] py-2 pl-9 pr-3 text-sm text-slate-200 outline-none focus:border-blue-500"
+                placeholder="Search components..."
+              />
+            </label>
           </div>
           <div className="flex-1 space-y-6 overflow-y-auto px-4 pb-4">
-            {paletteSections.map((section) => (
+            {filteredSections.map((section) => (
               <div key={section.title}>
                 <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                   {section.title}
@@ -252,9 +494,14 @@ export default function WorkflowsPage() {
                   {section.items.map((item) => (
                     <button
                       key={item}
+                      draggable
+                      onDragStart={() => handlePaletteDragStart(item)}
                       className="w-full rounded-lg border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-300 transition hover:border-blue-500/40 hover:bg-blue-500/10"
                     >
-                      {item}
+                      <span className="inline-flex items-center gap-2">
+                        <item.icon className="h-4 w-4 text-blue-400" />
+                        {item.label}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -274,34 +521,37 @@ export default function WorkflowsPage() {
           </div>
         </aside>
 
-        <section className="relative flex-1 overflow-hidden bg-[#090f20]">
+        <section
+          ref={canvasRef}
+          onDragOver={handleCanvasDragOver}
+          onDrop={handleCanvasDrop}
+          className="relative flex-1 overflow-hidden bg-[#090f20]"
+        >
           <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(45,63,114,0.7)_1px,transparent_1px)] [background-size:28px_28px]" />
           <svg
             className="absolute inset-0 z-[1] h-full w-full"
             viewBox="0 0 1200 760"
             fill="none"
           >
-            <path
-              d="M 190 160 C 300 160, 300 300, 420 300"
-              stroke="#2f62ff"
-              strokeDasharray="6 6"
-              strokeWidth="2"
-            />
-            <path
-              d="M 630 300 C 760 300, 770 360, 860 360"
-              stroke="#2f62ff"
-              strokeDasharray="6 6"
-              strokeWidth="2"
-            />
-            <path
-              d="M 630 300 C 760 300, 760 170, 860 170"
-              stroke="#2f62ff"
-              strokeDasharray="6 6"
-              strokeWidth="2"
-            />
+            {edges.map((edge) => {
+              const d = edgePath(edge);
+              if (!d) return null;
+              return (
+                <path
+                  key={`${edge.from}-${edge.to}`}
+                  d={d}
+                  stroke="#2f62ff"
+                  strokeDasharray="6 6"
+                  strokeWidth="2"
+                  fill="none"
+                />
+              );
+            })}
           </svg>
 
-          {canvasNodes.map((node) => (
+          {nodes.map((node) => {
+            const Icon = nodeIconForType(node.type);
+            return (
             <button
               key={node.id}
               onClick={() => setSelectedNodeId(node.id)}
@@ -312,29 +562,40 @@ export default function WorkflowsPage() {
               }`}
               style={{ left: node.x, top: node.y }}
             >
-              <p className="text-sm font-semibold">{node.label}</p>
-              <p className="mt-2 rounded-md border border-[#2a3556] bg-[#0e162d] px-2 py-1 text-xs text-slate-300">
+              <div className="mb-2 flex items-center gap-2">
+                <span className="rounded-md bg-blue-500/20 p-1.5">
+                  <Icon className="h-3.5 w-3.5 text-blue-400" />
+                </span>
+                <p className="text-sm font-semibold">{node.label}</p>
+              </div>
+              <p className="rounded-md border border-[#2a3556] bg-[#0e162d] px-2 py-1 text-xs text-slate-300">
                 {node.subtitle}
               </p>
+              <span className="absolute -left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-[#0b1022] bg-slate-500" />
+              <span className="absolute -right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-[#0b1022] bg-blue-500" />
             </button>
-          ))}
+            );
+          })}
 
           <div className="absolute bottom-5 right-5 z-[2] flex flex-col gap-2">
-            <button className="h-10 w-10 rounded-full border border-[#2a3556] bg-[#0f152a]/85 text-lg text-slate-200 transition hover:bg-[#1a2445]">
-              +
+            <button className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#2a3556] bg-[#0f152a]/85 text-lg text-slate-200 transition hover:bg-[#1a2445]">
+              <Plus className="h-4 w-4" />
             </button>
-            <button className="h-10 w-10 rounded-full border border-[#2a3556] bg-[#0f152a]/85 text-lg text-slate-200 transition hover:bg-[#1a2445]">
-              -
+            <button className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#2a3556] bg-[#0f152a]/85 text-lg text-slate-200 transition hover:bg-[#1a2445]">
+              <span className="text-sm">−</span>
             </button>
-            <button className="h-10 w-10 rounded-full border border-[#2a3556] bg-[#0f152a]/85 text-xs text-slate-200 transition hover:bg-[#1a2445]">
-              Fit
+            <button className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#2a3556] bg-[#0f152a]/85 text-xs text-slate-200 transition hover:bg-[#1a2445]">
+              <Cog className="h-4 w-4" />
             </button>
           </div>
         </section>
 
         <aside className="hidden w-80 flex-col border-l border-[#2a3556] bg-[#0d1327] xl:flex">
           <div className="border-b border-[#2a3556] px-5 py-4">
-            <p className="text-sm font-semibold">Node Settings</p>
+            <p className="inline-flex items-center gap-2 text-sm font-semibold">
+              <Settings2 className="h-4 w-4 text-slate-300" />
+              Node Settings
+            </p>
             <p className="text-xs text-slate-400">{selectedNode.label}</p>
           </div>
 
@@ -367,6 +628,7 @@ export default function WorkflowsPage() {
                 Media Upload
               </p>
               <div className="rounded-xl border border-dashed border-[#2a3556] bg-[#111a33] px-4 py-8 text-center text-xs text-slate-400">
+                <CloudUpload className="mx-auto mb-2 h-6 w-6 text-slate-500" />
                 Click or drag media file
                 <br />
                 JPG, PNG, MP4 up to 50MB
