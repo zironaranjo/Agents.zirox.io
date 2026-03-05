@@ -3,204 +3,127 @@
 import Link from "next/link";
 import { useState } from "react";
 
-type Category =
-  | "all"
-  | "marketing"
-  | "sales"
-  | "support"
-  | "devops";
-
 type WorkflowNode = {
   id: string;
+  type: "trigger" | "agent" | "social" | "automation";
   label: string;
-  executor: "n8n" | "claw" | "agent";
-  config?: Record<string, unknown>;
+  subtitle: string;
+  x: number;
+  y: number;
+  executor: "n8n" | "claw" | "social_api";
+  config: Record<string, unknown>;
 };
 
 type WorkflowDefinition = {
   version: string;
   entryNodeId: string;
-  nodes: WorkflowNode[];
-  edges: Array<{ from: string; to: string; condition?: string }>;
+  nodes: Array<{
+    id: string;
+    label: string;
+    executor: "n8n" | "claw" | "social_api";
+    config: Record<string, unknown>;
+  }>;
+  edges: Array<{ from: string; to: string }>;
 };
 
-type Template = {
-  id: string;
-  category: Exclude<Category, "all">;
-  title: string;
-  subtitle: string;
-  metricLabel: string;
-  metricValue: string;
-  description: string;
-  definition: WorkflowDefinition;
-};
-
-const categories: Array<{ id: Category; label: string }> = [
-  { id: "all", label: "All Blueprints" },
-  { id: "marketing", label: "Marketing Automation" },
-  { id: "sales", label: "Sales Funnels" },
-  { id: "support", label: "Support Operations" },
-  { id: "devops", label: "DevOps Agents" },
+const paletteSections = [
+  {
+    title: "Triggers",
+    items: ["LinkedIn Mention", "Cron Schedule", "Webhook URL"],
+  },
+  {
+    title: "Agents",
+    items: ["Content Analyst", "Strategy Planner"],
+  },
+  {
+    title: "Social Media",
+    items: [
+      "Post to Instagram",
+      "Upload YouTube Video",
+      "Read TikTok Comments",
+      "Get LinkedIn Analytics",
+      "Post to Facebook",
+    ],
+  },
+  {
+    title: "Automation",
+    items: ["n8n: Sync to CRM", "n8n: Publish Scheduler", "CapCut Render"],
+  },
 ];
 
-const templates: Template[] = [
+const canvasNodes: WorkflowNode[] = [
   {
-    id: "lead-nurture",
-    category: "marketing",
-    title: "Omni-Channel Lead Nurture",
-    subtitle: "Marketing Automation",
-    metricLabel: "Efficiency",
-    metricValue: "+85%",
-    description:
-      "Cluster multi-agente para identificar, calificar y nutrir leads en Email, LinkedIn y canales de mensajería.",
-    definition: {
-      version: "1.0",
-      entryNodeId: "marketing-trigger",
-      nodes: [
-        {
-          id: "marketing-trigger",
-          label: "Lead intake",
-          executor: "n8n",
-          config: {
-            webhookPathOrUrl: "/webhook/agents/marketing-lead-intake",
-            payload: { source: "landing", campaign: "omni-channel" },
-          },
-        },
-        {
-          id: "marketing-strategy",
-          label: "Estrategia de nurturing",
-          executor: "claw",
-          config: {
-            instructions:
-              "Diseña secuencia de nurturing de 3 pasos para convertir el lead en oportunidad de venta.",
-          },
-        },
-        {
-          id: "marketing-dispatch",
-          label: "Activar secuencia",
-          executor: "n8n",
-          config: {
-            webhookPathOrUrl: "/webhook/agents/marketing-dispatch-sequence",
-          },
-        },
-      ],
-      edges: [
-        { from: "marketing-trigger", to: "marketing-strategy" },
-        { from: "marketing-strategy", to: "marketing-dispatch" },
-      ],
+    id: "trigger-linkedin",
+    type: "trigger",
+    label: "New Mention",
+    subtitle: "LinkedIn Feed",
+    x: 56,
+    y: 64,
+    executor: "n8n",
+    config: { webhookPathOrUrl: "/webhook/linkedin-mention" },
+  },
+  {
+    id: "agent-content",
+    type: "agent",
+    label: "AI Content Analyst",
+    subtitle: "GPT-4o (Reasoning)",
+    x: 360,
+    y: 210,
+    executor: "claw",
+    config: {
+      instructions:
+        "Analiza el mention, genera caption y CTA orientado a conversion.",
     },
   },
   {
-    id: "support-scale",
-    category: "support",
-    title: "Customer Support Scale",
-    subtitle: "Support Operations",
-    metricLabel: "Response Time",
-    metricValue: "12x",
-    description:
-      "Automatiza triage, clasificación y redacción asistida para equipos de soporte de alto volumen.",
-    definition: {
-      version: "1.0",
-      entryNodeId: "support-trigger",
-      nodes: [
-        {
-          id: "support-trigger",
-          label: "Ticket intake",
-          executor: "n8n",
-          config: {
-            webhookPathOrUrl: "/webhook/agents/support-ticket-intake",
-          },
-        },
-        {
-          id: "support-priority",
-          label: "Priorización IA",
-          executor: "claw",
-          config: {
-            instructions:
-              "Clasifica el ticket por urgencia e impacto, y sugiere respuesta inicial.",
-          },
-        },
-        {
-          id: "support-routing",
-          label: "Routing de equipo",
-          executor: "n8n",
-          config: {
-            webhookPathOrUrl: "/webhook/agents/support-route-team",
-          },
-        },
-      ],
-      edges: [
-        { from: "support-trigger", to: "support-priority" },
-        { from: "support-priority", to: "support-routing" },
-      ],
-    },
+    id: "n8n-sync",
+    type: "automation",
+    label: "n8n: Sync to CRM",
+    subtitle: "Salesforce Pro",
+    x: 680,
+    y: 280,
+    executor: "n8n",
+    config: { webhookPathOrUrl: "/webhook/sync-crm" },
   },
   {
-    id: "sales-accelerator",
-    category: "sales",
-    title: "Sales Pipeline Accelerator",
-    subtitle: "Sales Funnels",
-    metricLabel: "Conversion",
-    metricValue: "+40%",
-    description:
-      "Integra CRM y playbooks de outreach para detección de prospectos con alta intención y follow-up.",
-    definition: {
-      version: "1.0",
-      entryNodeId: "sales-trigger",
-      nodes: [
-        {
-          id: "sales-trigger",
-          label: "Nuevo lead CRM",
-          executor: "n8n",
-          config: {
-            webhookPathOrUrl: "/webhook/agents/sales-lead-intake",
-          },
-        },
-        {
-          id: "sales-score",
-          label: "Lead scoring IA",
-          executor: "claw",
-          config: {
-            instructions:
-              "Puntua este lead B2B de 0 a 100 usando fit, urgencia y presupuesto; sugiere siguiente acción.",
-          },
-        },
-        {
-          id: "sales-followup",
-          label: "Follow-up automático",
-          executor: "n8n",
-          config: {
-            webhookPathOrUrl: "/webhook/agents/sales-followup-dispatch",
-          },
-        },
-      ],
-      edges: [
-        { from: "sales-trigger", to: "sales-score" },
-        { from: "sales-score", to: "sales-followup" },
-      ],
+    id: "social-ig",
+    type: "social",
+    label: "Post to Instagram",
+    subtitle: "Account @agent_workflow_main",
+    x: 680,
+    y: 72,
+    executor: "social_api",
+    config: {
+      account: "@agent_workflow_main",
+      caption: "{{agent_output}}",
+      autoHashtag: true,
+      approvalRequired: false,
     },
   },
+];
+
+const canvasEdges = [
+  { from: "trigger-linkedin", to: "agent-content" },
+  { from: "agent-content", to: "n8n-sync" },
+  { from: "agent-content", to: "social-ig" },
 ];
 
 export default function WorkflowsPage() {
-  const [activeCategory, setActiveCategory] = useState<Category>("all");
-  const [view, setView] = useState<"library" | "builder">("library");
-  const [isCreatingScratch, setIsCreatingScratch] = useState(false);
-  const [deployingTemplateId, setDeployingTemplateId] = useState<string | null>(
-    null,
-  );
+  const [selectedNodeId, setSelectedNodeId] = useState("social-ig");
+  const [activeTab, setActiveTab] = useState<
+    "editor" | "templates" | "logs" | "settings"
+  >("editor");
+  const [deploying, setDeploying] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [statusType, setStatusType] = useState<"idle" | "ok" | "error">("idle");
 
-  const visibleTemplates =
-    activeCategory === "all"
-      ? templates
-      : templates.filter((template) => template.category === activeCategory);
+  const selectedNode =
+    canvasNodes.find((node) => node.id === selectedNodeId) ?? canvasNodes[0];
 
   async function createWorkflow(payload: {
     nombre: string;
     descripcion: string;
-    categoria: Exclude<Category, "all"> | "general";
+    categoria: "general" | "marketing" | "sales" | "support" | "devops";
     isTemplate: boolean;
     definition: WorkflowDefinition;
   }) {
@@ -226,160 +149,248 @@ export default function WorkflowsPage() {
     return data.workflow;
   }
 
-  async function handleDeployTemplate(template: Template) {
+  async function handleDeployAgent() {
     try {
-      setDeployingTemplateId(template.id);
+      setDeploying(true);
       setStatusType("idle");
       setStatusMessage("");
 
-      const created = await createWorkflow({
-        nombre: template.title,
-        descripcion: template.description,
-        categoria: template.category,
-        isTemplate: true,
-        definition: template.definition,
-      });
-
-      setStatusType("ok");
-      setStatusMessage(
-        `Template desplegado: ${created.nombre}. ID: ${created.id}`,
-      );
-      setView("builder");
-    } catch (error) {
-      setStatusType("error");
-      setStatusMessage(
-        error instanceof Error
-          ? error.message
-          : "No se pudo desplegar el template.",
-      );
-    } finally {
-      setDeployingTemplateId(null);
-    }
-  }
-
-  async function handleCreateFromScratch() {
-    try {
-      setIsCreatingScratch(true);
-      setStatusType("idle");
-      setStatusMessage("");
+      const definition: WorkflowDefinition = {
+        version: "1.0",
+        entryNodeId: "trigger-linkedin",
+        nodes: canvasNodes.map((node) => ({
+          id: node.id,
+          label: node.label,
+          executor: node.executor,
+          config: node.config,
+        })),
+        edges: canvasEdges,
+      };
 
       const created = await createWorkflow({
-        nombre: "Workflow en blanco",
+        nombre: "Social Automation Pipeline",
         descripcion:
-          "Workflow base creado desde la libreria para construir flujo personalizado.",
-        categoria: "general",
-        isTemplate: false,
-        definition: {
-          version: "1.0",
-          entryNodeId: "start",
-          nodes: [
-            {
-              id: "start",
-              label: "Inicio",
-              executor: "agent",
-              config: { note: "Configurar primer nodo funcional" },
-            },
-          ],
-          edges: [],
-        },
+          "Workflow visual con nodos de trigger, analisis, n8n y publicacion social.",
+        categoria: "marketing",
+        isTemplate: true,
+        definition,
       });
 
       setStatusType("ok");
-      setStatusMessage(`Workflow base creado. ID: ${created.id}`);
-      setView("builder");
+      setStatusMessage(`Workflow desplegado. ID: ${created.id}`);
     } catch (error) {
       setStatusType("error");
       setStatusMessage(
         error instanceof Error
           ? error.message
-          : "No se pudo crear workflow base.",
+          : "No se pudo desplegar el workflow.",
       );
     } finally {
-      setIsCreatingScratch(false);
+      setDeploying(false);
     }
   }
 
   return (
-    <main className="landing-bg min-h-screen px-4 py-8 text-slate-100 md:px-8 xl:px-10">
-      <section className="mx-auto w-full max-w-[1800px] space-y-6">
-        <header className="glass-panel flex flex-wrap items-center justify-between gap-3 rounded-2xl border-orange-500/20 px-5 py-3">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-orange-500/90 text-sm font-black text-slate-950">
-              *
-            </span>
-            <p className="text-sm font-semibold tracking-wide">AGENTS MATRIX</p>
+    <main className="h-screen overflow-hidden bg-[#0b1022] text-slate-100">
+      <header className="flex h-16 items-center justify-between border-b border-[#2a3556] bg-[#0f152a] px-4 md:px-6">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 text-blue-400">
+            <span className="text-xl font-black">✦</span>
+            <h1 className="text-base font-semibold">AI Agent Workflow Builder</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setView("library")}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                view === "library"
-                  ? "bg-orange-500 text-slate-950"
-                  : "border border-slate-700 bg-slate-900/50 text-slate-200"
-              }`}
-            >
-              Template Library
-            </button>
-            <button
-              onClick={() => setView("builder")}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                view === "builder"
-                  ? "bg-orange-500 text-slate-950"
-                  : "border border-slate-700 bg-slate-900/50 text-slate-200"
-              }`}
-            >
-              Workflow Builder
-            </button>
-            <Link
-              href="/"
-              className="rounded-lg border border-slate-700 bg-slate-900/50 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
-            >
-              Volver
-            </Link>
-          </div>
-        </header>
+          <nav className="hidden items-center gap-5 md:flex">
+            {(["editor", "templates", "logs", "settings"] as const).map(
+              (tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`border-b-2 pb-1 text-sm font-medium transition ${
+                    activeTab === tab
+                      ? "border-blue-500 text-blue-400"
+                      : "border-transparent text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {tab[0].toUpperCase() + tab.slice(1)}
+                </button>
+              ),
+            )}
+          </nav>
+        </div>
 
-        {view === "library" ? (
-          <section className="glass-panel rounded-2xl border-orange-500/15 p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-orange-300">
-                  Template Library
+        <div className="flex items-center gap-2">
+          <Link
+            href="/"
+            className="rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-2 text-xs text-slate-200 transition hover:bg-slate-800"
+          >
+            Volver
+          </Link>
+          <button
+            onClick={handleDeployAgent}
+            disabled={deploying}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {deploying ? "Desplegando..." : "Deploy Agent"}
+          </button>
+        </div>
+      </header>
+
+      <section className="flex h-[calc(100vh-64px)]">
+        <aside className="hidden w-72 flex-col border-r border-[#2a3556] bg-[#0d1327] lg:flex">
+          <div className="p-4">
+            <input
+              className="w-full rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500"
+              placeholder="Search components..."
+            />
+          </div>
+          <div className="flex-1 space-y-6 overflow-y-auto px-4 pb-4">
+            {paletteSections.map((section) => (
+              <div key={section.title}>
+                <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  {section.title}
                 </p>
-                <h1 className="mt-1 text-4xl font-semibold">Workflow Blueprints</h1>
-                <p className="mt-2 max-w-2xl text-sm text-slate-300">
-                  Despliega clústeres AI preconfigurados por caso de uso.
-                  Máxima eficiencia, mínima fricción operativa.
-                </p>
+                <div className="space-y-1">
+                  {section.items.map((item) => (
+                    <button
+                      key={item}
+                      className="w-full rounded-lg border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-300 transition hover:border-blue-500/40 hover:bg-blue-500/10"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <button
-                onClick={handleCreateFromScratch}
-                disabled={isCreatingScratch}
-                className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isCreatingScratch ? "Creando..." : "+ Create from Scratch"}
+            ))}
+          </div>
+          <div className="border-t border-[#2a3556] p-4">
+            <div className="rounded-lg bg-blue-500/10 p-3">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-blue-300">
+                Usage Limit
+              </p>
+              <div className="mt-2 h-1.5 w-full rounded-full bg-slate-800">
+                <div className="h-1.5 w-[65%] rounded-full bg-blue-500" />
+              </div>
+              <p className="mt-2 text-xs text-slate-400">650 / 1000 tasks used</p>
+            </div>
+          </div>
+        </aside>
+
+        <section className="relative flex-1 overflow-hidden bg-[#090f20]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(45,63,114,0.7)_1px,transparent_1px)] [background-size:28px_28px]" />
+          <svg
+            className="absolute inset-0 z-[1] h-full w-full"
+            viewBox="0 0 1200 760"
+            fill="none"
+          >
+            <path
+              d="M 190 160 C 300 160, 300 300, 420 300"
+              stroke="#2f62ff"
+              strokeDasharray="6 6"
+              strokeWidth="2"
+            />
+            <path
+              d="M 630 300 C 760 300, 770 360, 860 360"
+              stroke="#2f62ff"
+              strokeDasharray="6 6"
+              strokeWidth="2"
+            />
+            <path
+              d="M 630 300 C 760 300, 760 170, 860 170"
+              stroke="#2f62ff"
+              strokeDasharray="6 6"
+              strokeWidth="2"
+            />
+          </svg>
+
+          {canvasNodes.map((node) => (
+            <button
+              key={node.id}
+              onClick={() => setSelectedNodeId(node.id)}
+              className={`absolute z-[2] w-[250px] rounded-xl border p-4 text-left shadow-2xl transition ${
+                selectedNodeId === node.id
+                  ? "border-blue-500 bg-[#1a2445] ring-2 ring-blue-500/30"
+                  : "border-[#2a3556] bg-[#141e39]"
+              }`}
+              style={{ left: node.x, top: node.y }}
+            >
+              <p className="text-sm font-semibold">{node.label}</p>
+              <p className="mt-2 rounded-md border border-[#2a3556] bg-[#0e162d] px-2 py-1 text-xs text-slate-300">
+                {node.subtitle}
+              </p>
+            </button>
+          ))}
+
+          <div className="absolute bottom-5 right-5 z-[2] flex flex-col gap-2">
+            <button className="h-10 w-10 rounded-full border border-[#2a3556] bg-[#0f152a]/85 text-lg text-slate-200 transition hover:bg-[#1a2445]">
+              +
+            </button>
+            <button className="h-10 w-10 rounded-full border border-[#2a3556] bg-[#0f152a]/85 text-lg text-slate-200 transition hover:bg-[#1a2445]">
+              -
+            </button>
+            <button className="h-10 w-10 rounded-full border border-[#2a3556] bg-[#0f152a]/85 text-xs text-slate-200 transition hover:bg-[#1a2445]">
+              Fit
+            </button>
+          </div>
+        </section>
+
+        <aside className="hidden w-80 flex-col border-l border-[#2a3556] bg-[#0d1327] xl:flex">
+          <div className="border-b border-[#2a3556] px-5 py-4">
+            <p className="text-sm font-semibold">Node Settings</p>
+            <p className="text-xs text-slate-400">{selectedNode.label}</p>
+          </div>
+
+          <div className="flex-1 space-y-5 overflow-y-auto p-5">
+            <div className="space-y-1">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                Account
+              </p>
+              <select className="w-full rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm outline-none focus:border-blue-500">
+                <option>@agent_workflow_main</option>
+                <option>@creative_studio_llc</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                Caption
+              </p>
+              <textarea
+                className="min-h-[130px] w-full resize-none rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm outline-none focus:border-blue-500"
+                defaultValue={"{{agent_output}}\n\n#AI #Workflows #Automation #Tech"}
+              />
+              <button className="text-xs text-blue-400 hover:text-blue-300">
+                Insert Variable
               </button>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
-                  className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${
-                    activeCategory === category.id
-                      ? "bg-orange-500 text-slate-950"
-                      : "border border-slate-700 bg-slate-900/55 text-slate-200 hover:bg-slate-800"
-                  }`}
-                >
-                  {category.label}
-                </button>
-              ))}
+            <div className="space-y-1">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                Media Upload
+              </p>
+              <div className="rounded-xl border border-dashed border-[#2a3556] bg-[#111a33] px-4 py-8 text-center text-xs text-slate-400">
+                Click or drag media file
+                <br />
+                JPG, PNG, MP4 up to 50MB
+              </div>
+            </div>
+
+            <div className="space-y-3 rounded-lg border border-[#2a3556] bg-[#111a33] p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-200">Auto-hashtag</span>
+                <div className="h-5 w-10 rounded-full bg-blue-600 p-0.5">
+                  <div className="ml-auto h-4 w-4 rounded-full bg-white" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-200">Approval Required</span>
+                <div className="h-5 w-10 rounded-full bg-slate-700 p-0.5">
+                  <div className="h-4 w-4 rounded-full bg-white" />
+                </div>
+              </div>
             </div>
 
             {statusType !== "idle" && statusMessage && (
               <div
-                className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
+                className={`rounded-lg border px-3 py-2 text-xs ${
                   statusType === "ok"
                     ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
                     : "border-rose-500/40 bg-rose-500/10 text-rose-200"
@@ -388,157 +399,19 @@ export default function WorkflowsPage() {
                 {statusMessage}
               </div>
             )}
+          </div>
 
-            <div className="mt-7 grid gap-4 lg:grid-cols-3">
-              {visibleTemplates.map((template) => (
-                <article
-                  key={template.id}
-                  className="rounded-2xl border border-orange-500/15 bg-[linear-gradient(160deg,rgba(40,18,8,0.45),rgba(12,8,24,0.35))] p-5"
-                >
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="rounded-full border border-orange-500/30 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-orange-300">
-                      Premium
-                    </span>
-                    <p className="text-right text-xs text-orange-300">
-                      <span className="text-lg font-semibold">{template.metricValue}</span>
-                      <br />
-                      {template.metricLabel}
-                    </p>
-                  </div>
-                  <h3 className="text-2xl font-semibold">{template.title}</h3>
-                  <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-400">
-                    {template.subtitle}
-                  </p>
-                  <p className="mt-4 text-sm leading-6 text-slate-300">
-                    {template.description}
-                  </p>
-                  <button
-                    onClick={() => handleDeployTemplate(template)}
-                    disabled={deployingTemplateId === template.id}
-                    className="mt-6 rounded-lg border border-orange-500/30 px-3 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/15 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {deployingTemplateId === template.id
-                      ? "Desplegando..."
-                      : "Deploy Template ->"}
-                  </button>
-                </article>
-              ))}
-
-              <article className="flex min-h-[290px] flex-col items-center justify-center rounded-2xl border border-dashed border-orange-500/30 bg-slate-900/40 p-5 text-center">
-                <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-orange-500/20 text-3xl text-orange-300">
-                  +
-                </div>
-                <h3 className="text-xl font-semibold">Custom Cluster</h3>
-                <p className="mt-2 max-w-[240px] text-sm text-slate-300">
-                  Crea un workflow multiagente desde cero y define tu arquitectura de ejecución.
-                </p>
-              </article>
+          <div className="border-t border-[#2a3556] p-5">
+            <div className="flex gap-2">
+              <button className="flex-1 rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-[#1b2747]">
+                Test Node
+              </button>
+              <button className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-500">
+                Save Changes
+              </button>
             </div>
-          </section>
-        ) : (
-          <section className="grid gap-0 overflow-hidden rounded-2xl border border-orange-500/20 lg:grid-cols-[1fr_360px]">
-            <article className="relative min-h-[720px] bg-[radial-gradient(circle_at_center,rgba(251,146,60,0.14),rgba(2,6,23,0.95)_58%)] p-6">
-              <div className="absolute left-6 top-6 flex items-center gap-3 rounded-full border border-orange-500/30 bg-slate-950/80 px-3 py-2 text-xs">
-                <span className="text-orange-300">⚡ Workflow: Lead Gen Pipeline</span>
-                <span className="text-slate-400">v2.4</span>
-              </div>
-
-              <div className="absolute left-10 top-32 w-[170px] rounded-xl border border-emerald-400/50 bg-slate-900/75 p-3">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-emerald-300">Trigger</p>
-                <p className="mt-2 text-sm font-semibold">Webhook: New CRM Lead</p>
-              </div>
-
-              <div className="absolute left-[280px] top-[220px] w-[260px] rounded-xl border border-orange-400/60 bg-slate-900/80 p-4">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-orange-300">Processor Node</p>
-                <p className="mt-1 text-base font-semibold">Clasificación de Leads</p>
-                <p className="text-xs text-slate-400">GPT-4o · Activo</p>
-              </div>
-
-              <div className="absolute left-[280px] top-[310px] w-[220px] rounded-xl border border-slate-700 bg-slate-900/70 p-3">
-                <p className="text-xs text-slate-300">Action</p>
-                <p className="text-sm font-semibold">Slack Notification</p>
-              </div>
-
-              <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1200 720" fill="none">
-                <path d="M180 205 L280 205 L280 250" stroke="#22d3ee" strokeDasharray="6 6" />
-                <path d="M540 250 L760 250" stroke="#fb923c" />
-              </svg>
-
-              <div className="absolute bottom-6 left-6 flex items-center gap-4">
-                <div className="rounded-full border border-slate-700 bg-slate-950/80 px-4 py-2 text-xs text-slate-300">
-                  100%
-                </div>
-                <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-emerald-300">
-                  Live syncing
-                </div>
-              </div>
-            </article>
-
-            <aside className="min-h-[720px] border-l border-orange-500/20 bg-[linear-gradient(180deg,rgba(40,18,8,0.36),rgba(4,10,26,0.95))] p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">Configurar Nodo</h3>
-                  <p className="text-xs text-orange-300">Clasificación de Leads</p>
-                </div>
-                <button className="text-slate-300">✕</button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="rounded-xl border border-slate-700 bg-slate-900/70 p-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold">Estado del nodo</p>
-                    <span className="rounded-full bg-orange-500 px-3 py-1 text-xs font-semibold text-slate-950">
-                      ON
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Modelo de IA</p>
-                  <select className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm">
-                    <option>GPT-4o (Omni) - Recomendado</option>
-                    <option>Claude Sonnet 4.5</option>
-                    <option>Gemini 1.5 Flash</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Input / Output Mapping</p>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <input className="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm" value="crm_payload" readOnly />
-                    <input className="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm" value="lead_score" readOnly />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Instrucciones del sistema</p>
-                  <textarea
-                    rows={9}
-                    className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm"
-                    defaultValue={
-                      "Eres un experto en clasificación de leads B2B.\nAnaliza presupuesto, urgencia y fit técnico para puntuar de 0 a 100."
-                    }
-                  />
-                </div>
-
-                <div className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 text-xs text-slate-300">
-                  <p>[14:22:03] NODE_START: Init clasificación...</p>
-                  <p>[14:22:09] API_REQ: Sent GPT-4o call...</p>
-                  <p>[14:22:11] NODE_OK: Output lead_score=81</p>
-                </div>
-
-                <div className="flex gap-2">
-                  <button className="flex-1 rounded-xl bg-orange-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400">
-                    Guardar cambios
-                  </button>
-                  <button className="rounded-xl border border-orange-500/30 px-4 py-3 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/15">
-                    Probar
-                  </button>
-                </div>
-              </div>
-            </aside>
-          </section>
-        )}
+          </div>
+        </aside>
       </section>
     </main>
   );
