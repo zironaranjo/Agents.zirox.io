@@ -117,6 +117,69 @@ export default async function Home() {
           </div>
         </nav>
 
+        <section
+          id="claw-hero"
+          className="relative left-1/2 w-screen -translate-x-1/2 space-y-3"
+        >
+          <div className="mx-auto flex w-full max-w-[1600px] flex-wrap items-end justify-between gap-2 px-4 md:px-8 xl:px-12">
+            <div>
+              <p className="text-sm uppercase tracking-[0.18em] text-orange-300">
+                Hero del sistema
+              </p>
+              <h2 className="text-2xl font-semibold">CLAW · núcleo orquestador</h2>
+            </div>
+            <p className="text-sm text-slate-300">
+              Vista inmersiva del agente principal para storytelling de producto.
+            </p>
+          </div>
+
+          <article className="relative overflow-hidden border-y border-orange-500/25 bg-slate-950 md:mx-6 md:rounded-3xl md:border md:border-orange-500/25 xl:mx-10">
+            <div className="relative min-h-[80vh] w-full">
+              <Image
+                src="/Claw.png"
+                alt="CLAW orquestador principal"
+                fill
+                className="object-cover object-top"
+                sizes="100vw"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/10" />
+
+              <div className="relative z-10 flex h-full max-w-2xl flex-col justify-end gap-5 p-6 md:p-10 xl:ml-8">
+                <p className="inline-flex w-fit rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-orange-300">
+                  CLAW online
+                </p>
+                <h3 className="text-4xl font-semibold leading-[1.02] md:text-6xl">
+                  No despliegas prompts.
+                  <br />
+                  <span className="bg-gradient-to-r from-orange-400 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
+                    Despliegas agentes que ejecutan.
+                  </span>
+                </h3>
+                <p className="max-w-xl text-base leading-7 text-slate-200 md:text-lg">
+                  CLAW coordina decisiones, delega tareas en NOVA y PULSE, y conecta
+                  automatizaciones con n8n para transformar estrategia en resultados.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/panel/agentes"
+                    className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400"
+                  >
+                    Entrar al dashboard
+                  </Link>
+                  <Link
+                    href="/workflows"
+                    className="rounded-xl border border-slate-600 bg-slate-900/55 px-5 py-3 text-sm text-slate-100 transition hover:bg-slate-800/80"
+                  >
+                    Ver workflows
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
         <header className="grid gap-8 border-t border-orange-500/15 pt-8 xl:grid-cols-12">
           <div className="space-y-6 xl:col-span-7">
             <p className="inline-flex rounded-full border border-orange-500/35 bg-orange-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-orange-300">
@@ -169,66 +232,6 @@ export default async function Home() {
             <HeroGeometry />
           </div>
         </header>
-
-        <section id="claw-hero" className="space-y-3">
-          <div className="flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <p className="text-sm uppercase tracking-[0.18em] text-orange-300">
-                Hero del sistema
-              </p>
-              <h2 className="text-2xl font-semibold">CLAW · núcleo orquestador</h2>
-            </div>
-            <p className="text-sm text-slate-300">
-              Vista inmersiva del agente principal para storytelling de producto.
-            </p>
-          </div>
-
-          <article className="glass-panel relative overflow-hidden rounded-3xl border border-orange-500/25">
-            <div className="relative min-h-[72vh] w-full">
-              <Image
-                src="/Claw.png"
-                alt="CLAW orquestador principal"
-                fill
-                className="object-cover object-top"
-                sizes="100vw"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/60 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/10" />
-
-              <div className="relative z-10 flex h-full max-w-2xl flex-col justify-end gap-5 p-6 md:p-10">
-                <p className="inline-flex w-fit rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-orange-300">
-                  CLAW online
-                </p>
-                <h3 className="text-4xl font-semibold leading-[1.02] md:text-6xl">
-                  No despliegas prompts.
-                  <br />
-                  <span className="bg-gradient-to-r from-orange-400 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
-                    Despliegas agentes que ejecutan.
-                  </span>
-                </h3>
-                <p className="max-w-xl text-base leading-7 text-slate-200 md:text-lg">
-                  CLAW coordina decisiones, delega tareas en NOVA y PULSE, y conecta
-                  automatizaciones con n8n para transformar estrategia en resultados.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Link
-                    href="/panel/agentes"
-                    className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400"
-                  >
-                    Entrar al dashboard
-                  </Link>
-                  <Link
-                    href="/workflows"
-                    className="rounded-xl border border-slate-600 bg-slate-900/55 px-5 py-3 text-sm text-slate-100 transition hover:bg-slate-800/80"
-                  >
-                    Ver workflows
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </article>
-        </section>
 
         <section id="workflows" className="space-y-3">
           <div className="flex flex-wrap items-end justify-between gap-2">
