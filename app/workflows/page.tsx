@@ -425,7 +425,7 @@ export default function WorkflowsPage() {
     >
       <header className="flex h-16 items-center justify-between border-b border-[#2a3556] bg-[#0f152a] px-4 md:px-6">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-blue-400">
+          <div className="flex items-center gap-2 text-orange-300">
             <GitBranch className="h-5 w-5" />
             <h1 className="text-base font-semibold">AI Agent Workflow Builder</h1>
           </div>
@@ -437,7 +437,7 @@ export default function WorkflowsPage() {
                   onClick={() => setActiveTab(tab)}
                   className={`border-b-2 pb-1 text-sm font-medium transition ${
                     activeTab === tab
-                      ? "border-blue-500 text-blue-400"
+                      ? "border-orange-500 text-orange-300"
                       : "border-transparent text-slate-400 hover:text-slate-200"
                   }`}
                 >
@@ -461,7 +461,7 @@ export default function WorkflowsPage() {
           <button
             onClick={handleDeployAgent}
             disabled={deploying}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="inline-flex items-center gap-1">
               <Rocket className="h-3.5 w-3.5" />
@@ -479,7 +479,7 @@ export default function WorkflowsPage() {
               <input
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className="w-full rounded-lg border border-[#2a3556] bg-[#111a33] py-2 pl-9 pr-3 text-sm text-slate-200 outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-[#2a3556] bg-[#111a33] py-2 pl-9 pr-3 text-sm text-slate-200 outline-none focus:border-cyan-300/60 focus:ring-2 focus:ring-cyan-300/20"
                 placeholder="Search components..."
               />
             </label>
@@ -496,10 +496,10 @@ export default function WorkflowsPage() {
                       key={item.id}
                       draggable
                       onDragStart={() => handlePaletteDragStart(item)}
-                      className="w-full rounded-lg border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-300 transition hover:border-blue-500/40 hover:bg-blue-500/10"
+                      className="w-full rounded-lg border border-transparent bg-transparent px-3 py-2 text-left text-sm text-slate-300 transition hover:border-orange-500/40 hover:bg-orange-500/10"
                     >
                       <span className="inline-flex items-center gap-2">
-                        <item.icon className="h-4 w-4 text-blue-400" />
+                        <item.icon className="h-4 w-4 text-cyan-300" />
                         {item.label}
                       </span>
                     </button>
@@ -509,12 +509,12 @@ export default function WorkflowsPage() {
             ))}
           </div>
           <div className="border-t border-[#2a3556] p-4">
-            <div className="rounded-lg bg-blue-500/10 p-3">
-              <p className="text-[10px] uppercase tracking-[0.15em] text-blue-300">
+            <div className="rounded-lg bg-orange-500/10 p-3">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-orange-300">
                 Usage Limit
               </p>
               <div className="mt-2 h-1.5 w-full rounded-full bg-slate-800">
-                <div className="h-1.5 w-[65%] rounded-full bg-blue-500" />
+                <div className="h-1.5 w-[65%] rounded-full bg-orange-500" />
               </div>
               <p className="mt-2 text-xs text-slate-400">650 / 1000 tasks used</p>
             </div>
@@ -540,7 +540,7 @@ export default function WorkflowsPage() {
                 <path
                   key={`${edge.from}-${edge.to}`}
                   d={d}
-                  stroke="#2f62ff"
+                  stroke="#fb923c"
                   strokeDasharray="6 6"
                   strokeWidth="2"
                   fill="none"
@@ -557,14 +557,14 @@ export default function WorkflowsPage() {
               onClick={() => setSelectedNodeId(node.id)}
               className={`absolute z-[2] w-[250px] rounded-xl border p-4 text-left shadow-2xl transition ${
                 selectedNodeId === node.id
-                  ? "border-blue-500 bg-[#1a2445] ring-2 ring-blue-500/30"
+                  ? "border-orange-500 bg-[#231b17] ring-2 ring-orange-500/25"
                   : "border-[#2a3556] bg-[#141e39]"
               }`}
               style={{ left: node.x, top: node.y }}
             >
               <div className="mb-2 flex items-center gap-2">
-                <span className="rounded-md bg-blue-500/20 p-1.5">
-                  <Icon className="h-3.5 w-3.5 text-blue-400" />
+                <span className="rounded-md bg-orange-500/20 p-1.5">
+                  <Icon className="h-3.5 w-3.5 text-orange-300" />
                 </span>
                 <p className="text-sm font-semibold">{node.label}</p>
               </div>
@@ -572,7 +572,7 @@ export default function WorkflowsPage() {
                 {node.subtitle}
               </p>
               <span className="absolute -left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-[#0b1022] bg-slate-500" />
-              <span className="absolute -right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-[#0b1022] bg-blue-500" />
+              <span className="absolute -right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-[#0b1022] bg-orange-500" />
             </button>
             );
           })}
@@ -604,7 +604,7 @@ export default function WorkflowsPage() {
               <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
                 Account
               </p>
-              <select className="w-full rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm outline-none focus:border-blue-500">
+              <select className="w-full rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm outline-none focus:border-cyan-300/60 focus:ring-2 focus:ring-cyan-300/20">
                 <option>@agent_workflow_main</option>
                 <option>@creative_studio_llc</option>
               </select>
@@ -615,10 +615,10 @@ export default function WorkflowsPage() {
                 Caption
               </p>
               <textarea
-                className="min-h-[130px] w-full resize-none rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm outline-none focus:border-blue-500"
+                className="min-h-[130px] w-full resize-none rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm outline-none focus:border-cyan-300/60 focus:ring-2 focus:ring-cyan-300/20"
                 defaultValue={"{{agent_output}}\n\n#AI #Workflows #Automation #Tech"}
               />
-              <button className="text-xs text-blue-400 hover:text-blue-300">
+              <button className="text-xs text-cyan-300 hover:text-cyan-200">
                 Insert Variable
               </button>
             </div>
@@ -638,7 +638,7 @@ export default function WorkflowsPage() {
             <div className="space-y-3 rounded-lg border border-[#2a3556] bg-[#111a33] p-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-200">Auto-hashtag</span>
-                <div className="h-5 w-10 rounded-full bg-blue-600 p-0.5">
+                <div className="h-5 w-10 rounded-full bg-orange-500 p-0.5">
                   <div className="ml-auto h-4 w-4 rounded-full bg-white" />
                 </div>
               </div>
@@ -668,7 +668,7 @@ export default function WorkflowsPage() {
               <button className="flex-1 rounded-lg border border-[#2a3556] bg-[#111a33] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-[#1b2747]">
                 Test Node
               </button>
-              <button className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-500">
+              <button className="flex-1 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-orange-400">
                 Save Changes
               </button>
             </div>

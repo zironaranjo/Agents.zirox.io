@@ -109,7 +109,7 @@ export default async function Home() {
           </div>
           <div className="flex items-center gap-2">
             <Link
-              href="/panel"
+              href="/panel/agentes"
               className="rounded-lg border border-orange-500/40 bg-orange-500/15 px-4 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/25"
             >
               Acceso sistema
