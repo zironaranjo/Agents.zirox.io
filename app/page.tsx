@@ -100,48 +100,48 @@ export default async function Home() {
           </div>
 
           <article className="relative overflow-hidden bg-slate-950">
-            <div className="relative min-h-[92vh] w-full">
+            <div className="relative min-h-[88svh] w-full md:min-h-[92vh]">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(15,118,110,0.18),transparent_42%),radial-gradient(circle_at_18%_28%,rgba(251,146,60,0.18),transparent_38%),linear-gradient(180deg,#020617_0%,#020617_100%)]" />
 
-              <div className="absolute inset-y-0 right-0 hidden w-[66vw] md:block lg:w-[60vw]">
+              <div className="absolute inset-y-0 -right-[22vw] w-[122vw] sm:-right-[12vw] sm:w-[102vw] md:right-0 md:w-[66vw] lg:w-[60vw]">
                 <Image
                   src="/Claw1.png"
                   alt="CLAW primer plano"
                   fill
-                  className="origin-bottom object-contain object-bottom brightness-110 contrast-110 drop-shadow-[0_24px_56px_rgba(0,0,0,0.7)] scale-[1.16]"
-                  sizes="66vw"
+                  className="origin-bottom object-contain object-bottom brightness-110 contrast-110 drop-shadow-[0_24px_56px_rgba(0,0,0,0.7)] scale-[1.2] md:scale-[1.16]"
+                  sizes="(max-width: 768px) 122vw, (max-width: 1024px) 66vw, 60vw"
                   priority
                 />
               </div>
 
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/78 via-slate-950/35 to-slate-950/8" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/86 via-slate-950/52 to-slate-950/24 md:from-slate-950/78 md:via-slate-950/35 md:to-slate-950/8" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/94 via-transparent to-slate-950/10" />
 
-              <div className="relative z-10 flex h-full max-w-2xl flex-col justify-end gap-5 p-6 md:p-10 lg:ml-14 xl:ml-24">
+              <div className="relative z-10 flex h-full max-w-xl flex-col justify-end gap-4 p-4 pb-8 sm:p-6 sm:pb-10 md:max-w-2xl md:gap-5 md:p-10 lg:ml-14 xl:ml-24">
                 <p className="inline-flex w-fit rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-orange-300">
                   CLAW online
                 </p>
-                <h3 className="text-4xl font-semibold leading-[1.02] md:text-6xl">
+                <h3 className="text-4xl font-semibold leading-[1.02] sm:text-5xl md:text-6xl">
                   No despliegas prompts.
                   <br />
                   <span className="bg-gradient-to-r from-orange-400 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
                     Despliegas agentes que ejecutan.
                   </span>
                 </h3>
-                <p className="max-w-xl text-base leading-7 text-slate-200 md:text-lg">
+                <p className="max-w-md text-sm leading-6 text-slate-200 sm:max-w-lg sm:text-base sm:leading-7 md:max-w-xl md:text-lg">
                   CLAW coordina decisiones, delega tareas en NOVA y PULSE, y conecta
                   automatizaciones con n8n para transformar estrategia en resultados.
                 </p>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   <Link
                     href="/panel/agentes"
-                    className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400"
+                    className="rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-semibold text-slate-950 transition hover:bg-orange-400 sm:px-5 sm:py-3 sm:text-sm"
                   >
                     Entrar al dashboard
                   </Link>
                   <Link
                     href="/workflows"
-                    className="rounded-xl border border-slate-600 bg-slate-900/55 px-5 py-3 text-sm text-slate-100 transition hover:bg-slate-800/80"
+                    className="rounded-xl border border-slate-600 bg-slate-900/55 px-4 py-2.5 text-xs text-slate-100 transition hover:bg-slate-800/80 sm:px-5 sm:py-3 sm:text-sm"
                   >
                     Ver workflows
                   </Link>
