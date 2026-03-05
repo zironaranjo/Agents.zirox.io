@@ -101,24 +101,15 @@ export default async function Home() {
 
           <article className="relative overflow-hidden bg-slate-950">
             <div className="relative min-h-[92vh] w-full">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(30,58,138,0.14),transparent_48%),linear-gradient(180deg,#020617_0%,#020617_100%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(15,118,110,0.18),transparent_42%),radial-gradient(circle_at_18%_28%,rgba(251,146,60,0.18),transparent_38%),linear-gradient(180deg,#020617_0%,#020617_100%)]" />
 
-              <Image
-                src="/Claw.png"
-                alt="CLAW entorno de fondo"
-                fill
-                className="object-cover object-top opacity-10 blur-[3px] saturate-60"
-                sizes="100vw"
-                priority
-              />
-
-              <div className="absolute inset-y-0 right-0 hidden w-[68vw] md:block">
+              <div className="absolute inset-y-0 -right-[3vw] hidden w-[74vw] md:block lg:w-[70vw]">
                 <Image
                   src="/Claw1.png"
                   alt="CLAW primer plano"
                   fill
-                  className="object-contain object-bottom drop-shadow-[0_20px_48px_rgba(0,0,0,0.62)]"
-                  sizes="68vw"
+                  className="object-contain object-bottom drop-shadow-[0_24px_56px_rgba(0,0,0,0.7)]"
+                  sizes="74vw"
                   priority
                 />
               </div>
