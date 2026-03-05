@@ -103,13 +103,13 @@ export default async function Home() {
             <div className="relative min-h-[92vh] w-full">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(15,118,110,0.18),transparent_42%),radial-gradient(circle_at_18%_28%,rgba(251,146,60,0.18),transparent_38%),linear-gradient(180deg,#020617_0%,#020617_100%)]" />
 
-              <div className="absolute inset-y-0 -right-[3vw] hidden w-[74vw] md:block lg:w-[70vw]">
+              <div className="absolute inset-y-0 -right-[1vw] hidden w-[78vw] md:block lg:w-[74vw]">
                 <Image
                   src="/Claw1.png"
                   alt="CLAW primer plano"
                   fill
-                  className="object-contain object-bottom drop-shadow-[0_24px_56px_rgba(0,0,0,0.7)]"
-                  sizes="74vw"
+                  className="object-contain object-bottom brightness-110 contrast-110 drop-shadow-[0_24px_56px_rgba(0,0,0,0.7)]"
+                  sizes="78vw"
                   priority
                 />
               </div>
