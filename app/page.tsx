@@ -86,37 +86,6 @@ export default async function Home() {
   return (
     <main className="landing-bg min-h-screen px-4 py-10 text-slate-100 md:px-8 xl:px-12">
       <section className="mx-auto w-full max-w-[1600px] space-y-10">
-        <nav className="glass-panel flex flex-wrap items-center justify-between gap-4 rounded-2xl border-orange-500/20 px-5 py-3">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-orange-500/90 text-sm font-black text-slate-950">
-              *
-            </span>
-            <p className="text-sm font-semibold tracking-wide">AGENTS MATRIX</p>
-          </div>
-          <div className="hidden items-center gap-7 text-sm text-slate-300 lg:flex">
-            <Link className="transition hover:text-white" href="/workflows">
-              Workflows
-            </Link>
-            <a className="transition hover:text-white" href="#agentes">
-              Agentes
-            </a>
-            <a className="transition hover:text-white" href="#arquitectura">
-              Arquitectura
-            </a>
-            <a className="transition hover:text-white" href="#logs">
-              Logs
-            </a>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/panel/agentes"
-              className="rounded-lg border border-orange-500/40 bg-orange-500/15 px-4 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/25"
-            >
-              Acceso sistema
-            </Link>
-          </div>
-        </nav>
-
         <section
           id="claw-hero"
           className="relative left-1/2 w-screen -translate-x-1/2 space-y-3"
@@ -128,18 +97,21 @@ export default async function Home() {
               </p>
               <h2 className="text-2xl font-semibold">CLAW · núcleo orquestador</h2>
             </div>
-            <p className="text-sm text-slate-300">
-              Vista inmersiva del agente principal para storytelling de producto.
-            </p>
+            <Link
+              href="/panel/agentes"
+              className="rounded-lg border border-orange-500/40 bg-orange-500/15 px-4 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/25"
+            >
+              Acceso sistema
+            </Link>
           </div>
 
           <article className="relative overflow-hidden border-y border-orange-500/25 bg-slate-950 md:mx-6 md:rounded-3xl md:border md:border-orange-500/25 xl:mx-10">
-            <div className="relative min-h-[80vh] w-full">
+            <div className="relative min-h-[90vh] w-full">
               <Image
                 src="/Claw.png"
                 alt="CLAW orquestador principal"
                 fill
-                className="object-cover object-top"
+                className="object-cover object-center"
                 sizes="100vw"
                 priority
               />
