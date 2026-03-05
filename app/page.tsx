@@ -245,7 +245,7 @@ export default async function Home() {
                   key={item.id}
                   className="glass-panel flex h-full flex-col overflow-hidden rounded-2xl border border-slate-800"
                 >
-                  <div className="relative h-[460px] w-full">
+                  <div className="relative h-[460px] w-full overflow-hidden">
                     <div className="absolute inset-0 bg-slate-950" />
                     <Image
                       src={item.imagen}
