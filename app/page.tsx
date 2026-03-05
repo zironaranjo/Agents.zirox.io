@@ -112,12 +112,12 @@ export default async function Home() {
                 priority
               />
 
-              <div className="absolute inset-y-0 right-0 hidden w-[60vw] md:block">
+              <div className="absolute inset-y-0 right-0 hidden w-[54vw] md:block">
                 <Image
                   src="/Claw1.png"
                   alt="CLAW primer plano"
                   fill
-                  className="object-contain object-bottom [mask-image:linear-gradient(to_top,black_78%,transparent_100%)]"
+                  className="object-contain object-center drop-shadow-[0_14px_34px_rgba(0,0,0,0.5)]"
                   sizes="60vw"
                   priority
                 />
