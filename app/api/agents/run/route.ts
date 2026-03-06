@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { runOpenRouterPrompt } from "@/lib/integrations/openrouter";
 
 type RunAgentPayload = {
   provider: "openrouter";
@@ -7,34 +8,6 @@ type RunAgentPayload = {
   userPrompt: string;
   temperature?: number;
 };
-
-type OpenRouterResponse = {
-  choices?: Array<{
-    message?: {
-      content?: string | Array<{ type?: string; text?: string }>;
-    };
-  }>;
-  error?: {
-    message?: string;
-  };
-};
-
-type OpenRouterContent = string | Array<{ type?: string; text?: string }> | undefined;
-
-function extractContent(content: OpenRouterContent) {
-  if (typeof content === "string") {
-    return content;
-  }
-
-  if (Array.isArray(content)) {
-    return content
-      .map((item) => (typeof item?.text === "string" ? item.text : ""))
-      .join("")
-      .trim();
-  }
-
-  return "";
-}
 
 export async function POST(request: Request) {
   try {
@@ -54,52 +27,22 @@ export async function POST(request: Request) {
       );
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
-
-    if (!apiKey) {
-      return NextResponse.json(
-        {
-          error:
-            "Falta OPENROUTER_API_KEY en variables de entorno del servidor.",
-        },
-        { status: 500 },
-      );
-    }
-
-    const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:3000",
-        "X-Title": "Agentes Matrix",
-      },
-      body: JSON.stringify({
-        model: body.model,
-        temperature: body.temperature ?? 0.7,
-        max_tokens: 700,
-        messages: [
-          { role: "system", content: body.systemPrompt || "Eres un asistente útil." },
-          { role: "user", content: body.userPrompt },
-        ],
-      }),
+    const { output } = await runOpenRouterPrompt({
+      model: body.model,
+      systemPrompt: body.systemPrompt || "Eres un asistente útil.",
+      userPrompt: body.userPrompt,
+      temperature: body.temperature ?? 0.7,
+      maxTokens: 700,
     });
 
-    const data = (await upstream.json()) as OpenRouterResponse;
-
-    if (!upstream.ok) {
-      return NextResponse.json(
-        { error: data?.error?.message ?? "Error de OpenRouter." },
-        { status: upstream.status },
-      );
-    }
-
-    const output = extractContent(data?.choices?.[0]?.message?.content);
-
     return NextResponse.json({ output });
-  } catch {
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "No se pudo ejecutar el agente en este momento.";
     return NextResponse.json(
-      { error: "No se pudo ejecutar el agente en este momento." },
+      { error: message },
       { status: 500 },
     );
   }

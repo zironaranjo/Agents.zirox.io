@@ -121,3 +121,19 @@ create table if not exists public.workflow_run_logs (
 );
 
 create index if not exists idx_workflow_run_logs_run_id on public.workflow_run_logs(workflow_run_id);
+
+create table if not exists public.system_settings (
+  id text primary key,
+  matrix_mode_enabled boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+
+insert into public.system_settings (id, matrix_mode_enabled)
+values ('global', false)
+on conflict (id) do nothing;
+
+drop trigger if exists trg_system_settings_updated_at on public.system_settings;
+create trigger trg_system_settings_updated_at
+before update on public.system_settings
+for each row
+execute procedure public.set_updated_at();
