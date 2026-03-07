@@ -26,7 +26,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
 
   return (
     <main className="landing-bg min-h-screen text-slate-100">
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-800/90 bg-slate-950/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-slate-800/90 bg-slate-950/80 backdrop-blur-xl">
         <div className="flex h-16 w-full items-center justify-between gap-3 px-4 md:px-6 lg:px-8">
           <nav className="flex items-center gap-1 overflow-x-auto">
             {navItems.map((item) => {
@@ -63,8 +63,8 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
       <section
         className={
           isWorkflowsRoute
-            ? "w-full pb-0 pt-16"
-            : "w-full px-4 pb-6 pt-16 md:px-6 lg:px-8"
+            ? "w-full"
+            : "w-full px-4 pb-6 pt-0 md:px-6 lg:px-8"
         }
       >
         {children}
