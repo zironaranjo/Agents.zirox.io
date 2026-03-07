@@ -423,7 +423,11 @@ function nodeIconForType(type: WorkflowNode["type"]) {
   return Workflow;
 }
 
-export default function WorkflowsPage() {
+export function WorkflowsPageContent({
+  embeddedInPanel = false,
+}: {
+  embeddedInPanel?: boolean;
+} = {}) {
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNodeId, setSelectedNodeId] = useState("social-ig");
@@ -573,9 +577,10 @@ export default function WorkflowsPage() {
 
   return (
     <main
-      className={`h-screen overflow-hidden bg-[#0b1022] text-slate-100 ${inter.className}`}
+      className={`${embeddedInPanel ? "h-[calc(100vh-8.5rem)]" : "h-screen"} overflow-hidden bg-[#0b1022] text-slate-100 ${inter.className}`}
     >
-      <header className="flex h-16 items-center justify-between border-b border-[#2a3556] bg-[#0f152a] px-4 md:px-6">
+      {!embeddedInPanel && (
+        <header className="flex h-16 items-center justify-between border-b border-[#2a3556] bg-[#0f152a] px-4 md:px-6">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2 text-orange-300">
             <GitBranch className="h-5 w-5" />
@@ -621,9 +626,10 @@ export default function WorkflowsPage() {
             </span>
           </button>
         </div>
-      </header>
+        </header>
+      )}
 
-      <section className="flex h-[calc(100vh-64px)]">
+      <section className={`flex ${embeddedInPanel ? "h-full" : "h-[calc(100vh-64px)]"}`}>
         <aside className="hidden w-72 flex-col border-r border-[#2a3556] bg-[#0d1327] lg:flex">
           <div className="p-4">
             <label className="relative block">
@@ -1054,4 +1060,8 @@ export default function WorkflowsPage() {
       </section>
     </main>
   );
+}
+
+export default function WorkflowsPage() {
+  return <WorkflowsPageContent />;
 }
