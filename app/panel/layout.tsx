@@ -2,15 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ComponentType } from "react";
 import { Bot, CircleUserRound, House, Settings, Wrench, Workflow } from "lucide-react";
 
-const navItems = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  exact?: boolean;
+};
+
+const navItems: NavItem[] = [
   { href: "/", label: "Home", icon: House, exact: true },
   { href: "/panel/workflows", label: "Workflows", icon: Workflow },
   { href: "/panel/agentes", label: "Agentes", icon: Bot },
   { href: "/panel/herramientas", label: "Herramientas", icon: Wrench },
   { href: "/panel/settings", label: "Settings", icon: Settings },
-] as const;
+];
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
