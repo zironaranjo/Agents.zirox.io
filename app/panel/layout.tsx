@@ -27,7 +27,9 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
     pathname === "/panel/workflows" ||
     pathname.startsWith("/panel/workflows/") ||
     pathname === "/panel/herramientas" ||
-    pathname.startsWith("/panel/herramientas/");
+    pathname.startsWith("/panel/herramientas/") ||
+    pathname === "/panel/settings" ||
+    pathname.startsWith("/panel/settings/");
 
   return (
     <main className="landing-bg min-h-screen text-slate-100">
