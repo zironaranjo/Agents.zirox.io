@@ -1,22 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { Agent, AgentStatus } from "@/lib/agents";
-import { agentesPrincipales, estadoColor } from "@/lib/agents";
+import {
+  Bell,
+  Bot,
+  CloudUpload,
+  Mic,
+  Plus,
+  Settings2,
+  Share2,
+  SlidersHorizontal,
+  User,
+} from "lucide-react";
+import type { Agent } from "@/lib/agents";
+import { agentesPrincipales } from "@/lib/agents";
 
 type EditableAgent = Agent;
+type ConfigTab = "settings" | "history" | "analytics";
 
-const estados: AgentStatus[] = ["idle", "activo", "ejecutando"];
-const baseFieldClass =
-  "w-full rounded-lg border border-slate-700/90 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-300/60 focus:ring-2 focus:ring-cyan-300/20";
-
-function normalizeAgentError(message: string) {
-  if (message.toLowerCase().includes("requires more credits")) {
-    return "OpenRouter indica créditos insuficientes para esta solicitud. Baja el consumo (prompt más corto/modelo más barato) o añade créditos en tu cuenta.";
-  }
-
-  return message;
-}
+const skillOptions = ["Video Editing", "Copywriting", "SEO Optimization", "Ad Sales"] as const;
 
 export function PanelWorkspace() {
   const [agents, setAgents] = useState<EditableAgent[]>(agentesPrincipales);
@@ -26,12 +28,11 @@ export function PanelWorkspace() {
   const [isSavingAgent, setIsSavingAgent] = useState(false);
   const [syncMessage, setSyncMessage] = useState("");
   const [dataError, setDataError] = useState("");
-  const [testPrompt, setTestPrompt] = useState(
-    "Crea una estrategia rápida para lanzar una campaña esta semana.",
-  );
-  const [respuesta, setRespuesta] = useState("");
-  const [error, setError] = useState("");
-  const [isRunning, setIsRunning] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [activeTab, setActiveTab] = useState<ConfigTab>("settings");
+  const [targetPlatform, setTargetPlatform] = useState("n8n Workflow");
+  const [activeSkills, setActiveSkills] = useState<string[]>(["Video Editing", "Copywriting"]);
+  const [voiceTone, setVoiceTone] = useState(75);
 
   const selectedAgent = useMemo(
     () => agents.find((agent) => agent.id === selectedId),
@@ -46,7 +47,6 @@ export function PanelWorkspace() {
       try {
         const response = await fetch("/api/agents", { method: "GET" });
         const payload: { agents?: Agent[]; error?: string } = await response.json();
-
         if (!response.ok) {
           throw new Error(payload.error ?? "No se pudieron cargar agentes.");
         }
@@ -55,15 +55,10 @@ export function PanelWorkspace() {
         if (loadedAgents.length > 0) {
           setAgents(loadedAgents);
           setSelectedId(loadedAgents[0].id);
-          setSyncMessage("Datos cargados desde Supabase.");
-        } else {
-          setSyncMessage("No hay agentes en Supabase todavía.");
         }
       } catch (unknownError) {
         const message =
-          unknownError instanceof Error
-            ? unknownError.message
-            : "No se pudo cargar Supabase.";
+          unknownError instanceof Error ? unknownError.message : "No se pudo cargar Supabase.";
         setDataError(message);
       } finally {
         setIsLoadingAgents(false);
@@ -73,12 +68,14 @@ export function PanelWorkspace() {
     void loadAgents();
   }, []);
 
-  const updateSelectedAgent = (updates: Partial<EditableAgent>) => {
+  useEffect(() => {
     if (!selectedAgent) return;
-    setAgents((current) =>
-      current.map((agent) => (agent.id === selectedAgent.id ? { ...agent, ...updates } : agent)),
+    setActiveSkills(
+      selectedAgent.herramientas.length > 0
+        ? selectedAgent.herramientas.slice(0, 4)
+        : ["Video Editing", "Copywriting"],
     );
-  };
+  }, [selectedAgent]);
 
   const createAgent = async () => {
     const timestamp = Date.now().toString().slice(-5);
@@ -102,9 +99,7 @@ export function PanelWorkspace() {
     try {
       const response = await fetch("/api/agents", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevo),
       });
 
@@ -115,7 +110,7 @@ export function PanelWorkspace() {
 
       setAgents((current) => [payload.agent as EditableAgent, ...current]);
       setSelectedId(payload.agent.id);
-      setSyncMessage("Agente creado y guardado en Supabase.");
+      setSyncMessage("Agente creado.");
     } catch (unknownError) {
       const message =
         unknownError instanceof Error ? unknownError.message : "No se pudo crear el agente.";
@@ -125,25 +120,34 @@ export function PanelWorkspace() {
     }
   };
 
+  const toggleSkill = (skill: string) => {
+    setActiveSkills((current) => {
+      if (current.includes(skill)) {
+        return current.filter((item) => item !== skill);
+      }
+      return [...current, skill];
+    });
+  };
+
   const saveSelectedAgent = async () => {
     if (!selectedAgent) return;
-
     setIsSavingAgent(true);
-    setDataError("");
     setSyncMessage("");
+    setDataError("");
 
     try {
       const response = await fetch(`/api/agents/${selectedAgent.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(selectedAgent),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...selectedAgent,
+          herramientas: activeSkills,
+        }),
       });
 
       const payload: { agent?: Agent; error?: string } = await response.json();
       if (!response.ok || !payload.agent) {
-        throw new Error(payload.error ?? "No se pudo guardar el agente.");
+        throw new Error(payload.error ?? "No se pudo aplicar configuración.");
       }
 
       setAgents((current) =>
@@ -151,332 +155,275 @@ export function PanelWorkspace() {
           agent.id === payload.agent?.id ? (payload.agent as EditableAgent) : agent,
         ),
       );
-      setSyncMessage("Cambios guardados en Supabase.");
+      setSyncMessage("Configuración aplicada.");
     } catch (unknownError) {
       const message =
-        unknownError instanceof Error ? unknownError.message : "No se pudo guardar el agente.";
+        unknownError instanceof Error ? unknownError.message : "No se pudo aplicar configuración.";
       setDataError(message);
     } finally {
       setIsSavingAgent(false);
     }
   };
 
-  const runAgentTest = async () => {
-    if (!selectedAgent) return;
-    if (!testPrompt.trim()) {
-      setError("Escribe un prompt de prueba.");
-      return;
-    }
-
-    setIsRunning(true);
-    setError("");
-    setRespuesta("");
-
-    try {
-      const response = await fetch("/api/agents/run", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          provider: selectedAgent.provider,
-          model: selectedAgent.model,
-          systemPrompt: selectedAgent.systemPrompt,
-          userPrompt: testPrompt,
-          temperature: selectedAgent.temperature,
-        }),
-      });
-
-      const payload: { output?: string; error?: string } = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? "No se pudo ejecutar el agente.");
-      }
-
-      setRespuesta(payload.output ?? "");
-    } catch (unknownError) {
-      const message =
-        unknownError instanceof Error ? unknownError.message : "Error desconocido en la prueba.";
-      setError(normalizeAgentError(message));
-    } finally {
-      setIsRunning(false);
-    }
-  };
-
   return (
-    <section className="grid gap-4 lg:grid-cols-12">
-      <aside className="glass-panel rounded-2xl p-4 lg:col-span-3 lg:max-h-[78vh] lg:overflow-auto">
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Workspace</p>
-            <h2 className="text-lg font-semibold">Agentes</h2>
+    <section className="grid h-[calc(100vh-4rem)] grid-cols-1 overflow-hidden bg-[#070f1d] md:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)_300px]">
+      <aside className="border-r border-[#1e2a40] bg-[#0c1728]">
+        <div className="border-b border-[#1e2a40] px-4 py-4">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-blue-500/20 text-blue-300">
+              <Bot className="h-4 w-4" />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-slate-100">AgentOS</p>
+              <p className="text-[10px] text-slate-500">v4.0.0-pro</p>
+            </div>
           </div>
-          <button
-            onClick={() => void createAgent()}
-            disabled={isCreatingAgent || isLoadingAgents}
-            className="rounded-md bg-cyan-400 px-3 py-2 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isCreatingAgent ? "Creando..." : "+ Nuevo"}
-          </button>
         </div>
 
-        <div className="space-y-2 pr-1">
-          {isLoadingAgents ? (
-            <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-3 text-sm text-slate-300">
-              Cargando agentes desde Supabase...
-            </div>
-          ) : null}
+        <div className="px-3 py-3">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-slate-500">Active Agents</p>
+          <div className="space-y-1.5">
+            {isLoadingAgents ? (
+              <p className="rounded-md border border-[#23314a] bg-[#111d30] px-2 py-2 text-xs text-slate-400">
+                Cargando...
+              </p>
+            ) : null}
+            {agents.map((agent) => {
+              const selected = selectedId === agent.id;
+              return (
+                <button
+                  key={agent.id}
+                  onClick={() => setSelectedId(agent.id)}
+                  className={`flex w-full items-center justify-between rounded-md border px-2.5 py-2 text-left transition ${
+                    selected
+                      ? "border-blue-500/45 bg-blue-500/15"
+                      : "border-transparent bg-transparent hover:border-[#23314a] hover:bg-[#101a2c]"
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-slate-100">{agent.nombre}</p>
+                    <p className="truncate text-[10px] text-slate-500">{agent.rol}</p>
+                  </div>
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+                </button>
+              );
+            })}
+            <button
+              onClick={() => void createAgent()}
+              disabled={isCreatingAgent}
+              className="flex w-full items-center gap-2 rounded-md border border-dashed border-[#23314a] px-2.5 py-2 text-xs text-slate-300 transition hover:bg-[#101a2c] disabled:opacity-60"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              {isCreatingAgent ? "Creando..." : "Create New Agent"}
+            </button>
+          </div>
+        </div>
 
-          {agents.map((agent) => {
-            const isSelected = selectedId === agent.id;
-            return (
-              <button
-                key={agent.id}
-                onClick={() => setSelectedId(agent.id)}
-                className={`w-full rounded-lg border p-3 text-left transition ${
-                  isSelected
-                    ? "border-cyan-300/70 bg-slate-800/90 shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
-                    : "border-slate-700 bg-slate-900/60 hover:bg-slate-800/65"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-semibold">{agent.nombre}</p>
-                  <span
-                    className={`rounded-full px-2 py-1 text-[10px] uppercase ${estadoColor[agent.estado]}`}
-                  >
-                    {agent.estado}
-                  </span>
-                </div>
-                <p className="mt-1 line-clamp-2 text-xs text-slate-300">{agent.rol}</p>
-              </button>
-            );
-          })}
+        <div className="absolute bottom-0 left-0 right-0 hidden border-t border-[#1e2a40] bg-[#0c1728] p-3 md:block xl:block">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-700 text-[10px]">
+                A
+              </span>
+              <div>
+                <p className="text-xs font-semibold text-slate-200">Admin User</p>
+                <p className="text-[10px] text-slate-500">Pro Account</p>
+              </div>
+            </div>
+            <Settings2 className="h-4 w-4 text-slate-400" />
+          </div>
         </div>
       </aside>
 
-      <article className="glass-panel rounded-2xl p-5 lg:col-span-5 lg:max-h-[78vh] lg:overflow-auto">
-        {!selectedAgent ? (
-          <p className="text-sm text-slate-300">Selecciona un agente para editarlo.</p>
-        ) : (
-          <div className="space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Editor</p>
-                <h2 className="text-xl font-semibold">{selectedAgent.nombre}</h2>
-              </div>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide ${estadoColor[selectedAgent.estado]}`}
-              >
-                {selectedAgent.estado}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs text-slate-400">Sincroniza cambios manualmente con Supabase.</p>
-              <button
-                onClick={() => void saveSelectedAgent()}
-                disabled={isSavingAgent}
-                className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSavingAgent ? "Guardando..." : "Guardar cambios"}
-              </button>
-            </div>
-
-            {syncMessage ? (
-              <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 p-3 text-sm text-emerald-200">
-                {syncMessage}
-              </div>
-            ) : null}
-            {dataError ? (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">
-                {dataError}
-              </div>
-            ) : null}
-
-            <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/40 p-4">
-              <h3 className="text-sm font-semibold text-slate-200">Identidad del agente</h3>
-              <div className="grid gap-3 md:grid-cols-2">
-                <label className="block space-y-1">
-                  <span className="text-sm text-slate-300">Nombre</span>
-                  <input
-                    value={selectedAgent.nombre}
-                    onChange={(event) => updateSelectedAgent({ nombre: event.target.value })}
-                    className={baseFieldClass}
-                  />
-                </label>
-                <label className="block space-y-1">
-                  <span className="text-sm text-slate-300">Estado</span>
-                  <select
-                    value={selectedAgent.estado}
-                    onChange={(event) =>
-                      updateSelectedAgent({ estado: event.target.value as AgentStatus })
-                    }
-                    className={baseFieldClass}
-                  >
-                    {estados.map((estado) => (
-                      <option key={estado} value={estado}>
-                        {estado}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <label className="block space-y-1">
-                <span className="text-sm text-slate-300">Rol</span>
-                <input
-                  value={selectedAgent.rol}
-                  onChange={(event) => updateSelectedAgent({ rol: event.target.value })}
-                  className={baseFieldClass}
-                />
-              </label>
-
-              <div className="grid gap-3 md:grid-cols-2">
-                <label className="block space-y-1">
-                  <span className="text-sm text-slate-300">Herramientas (coma separada)</span>
-                  <input
-                    value={selectedAgent.herramientas.join(", ")}
-                    onChange={(event) =>
-                      updateSelectedAgent({
-                        herramientas: event.target.value
-                          .split(",")
-                          .map((tool) => tool.trim())
-                          .filter(Boolean),
-                      })
-                    }
-                    className={baseFieldClass}
-                  />
-                </label>
-                <label className="block space-y-1">
-                  <span className="text-sm text-slate-300">Subagentes (coma separada)</span>
-                  <input
-                    value={selectedAgent.subagentes.join(", ")}
-                    onChange={(event) =>
-                      updateSelectedAgent({
-                        subagentes: event.target.value
-                          .split(",")
-                          .map((item) => item.trim())
-                          .filter(Boolean),
-                      })
-                    }
-                    className={baseFieldClass}
-                  />
-                </label>
-              </div>
-            </section>
-
-            <section className="space-y-3 rounded-xl border border-slate-700/70 bg-slate-900/40 p-4">
-              <h3 className="text-sm font-semibold text-slate-200">Configuración LLM</h3>
-              <div className="grid gap-3 md:grid-cols-2">
-                <label className="block space-y-1">
-                  <span className="text-sm text-slate-300">Provider</span>
-                  <select
-                    value={selectedAgent.provider}
-                    onChange={() => updateSelectedAgent({ provider: "openrouter" })}
-                    className={baseFieldClass}
-                  >
-                    <option value="openrouter">openrouter</option>
-                  </select>
-                </label>
-                <label className="block space-y-1">
-                  <span className="text-sm text-slate-300">Modelo</span>
-                  <input
-                    value={selectedAgent.model}
-                    onChange={(event) => updateSelectedAgent({ model: event.target.value })}
-                    className={baseFieldClass}
-                    placeholder="openai/gpt-4o-mini"
-                  />
-                </label>
-              </div>
-
-              <label className="block space-y-1">
-                <span className="text-sm text-slate-300">System Prompt</span>
-                <textarea
-                  value={selectedAgent.systemPrompt}
-                  onChange={(event) => updateSelectedAgent({ systemPrompt: event.target.value })}
-                  rows={5}
-                  className={baseFieldClass}
-                />
-              </label>
-
-              <label className="block max-w-[220px] space-y-1">
-                <span className="text-sm text-slate-300">Temperatura</span>
-                <input
-                  type="number"
-                  min={0}
-                  max={2}
-                  step={0.1}
-                  value={selectedAgent.temperature}
-                  onChange={(event) =>
-                    updateSelectedAgent({
-                      temperature: Number(event.target.value),
-                    })
-                  }
-                  className={baseFieldClass}
-                />
-              </label>
-            </section>
-
-            <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
-              Siguiente paso: conectar este editor a Supabase para persistir configuración por
-              agente.
-            </p>
+      <article className="flex min-w-0 flex-col border-r border-[#1e2a40] bg-[#0a1424]">
+        <div className="flex h-14 items-center justify-between border-b border-[#1e2a40] px-4">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-slate-100">Chat with Claw</p>
+            <span className="rounded bg-blue-500/25 px-1.5 py-0.5 text-[10px] font-semibold text-blue-200">
+              ACTIVE
+            </span>
           </div>
-        )}
+          <div className="relative hidden md:block">
+            <input
+              className="w-48 rounded-md border border-[#26344d] bg-[#0d1a2e] px-7 py-1.5 text-xs text-slate-200 outline-none"
+              placeholder="Search logs..."
+            />
+            <SlidersHorizontal className="pointer-events-none absolute left-2 top-1.5 h-3.5 w-3.5 text-slate-500" />
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-4 overflow-auto p-4">
+          <div className="max-w-[80%] rounded-xl border border-[#2a3953] bg-[#101e34] px-3 py-2">
+            <div className="mb-1.5 flex items-center gap-2">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-700">
+                <User className="h-3 w-3 text-slate-200" />
+              </span>
+              <p className="text-xs text-slate-300">Hello! I&apos;m Claw.</p>
+            </div>
+            <p className="text-xs leading-5 text-slate-300">
+              I&apos;ve been monitoring your multi-platform engagement today. Should I generate a
+              new set of Reels and Shorts to boost visibility?
+            </p>
+            <p className="mt-1 text-[10px] text-slate-500">9:42 AM</p>
+          </div>
+
+          <div className="ml-auto max-w-[78%] rounded-xl bg-blue-600 px-3 py-2 text-xs leading-5 text-white shadow-[0_8px_30px_rgba(37,99,235,0.35)]">
+            Yes let&apos;s do that. I have a raw video file here. Can you replicate the style of our
+            top-performing content from last month?
+          </div>
+
+          <div className="max-w-[50%] rounded-full border border-[#2a3953] bg-[#101e34] px-3 py-2 text-xs text-slate-400">
+            ...
+          </div>
+        </div>
+
+        <div className="border-t border-[#1e2a40] p-4">
+          <div className="mb-3 rounded-xl border border-dashed border-[#31415f] bg-[#121f34] p-6 text-center">
+            <CloudUpload className="mx-auto mb-2 h-4 w-4 text-blue-300" />
+            <p className="text-xs font-medium text-slate-200">Drag video or image to replicate</p>
+            <p className="text-[10px] text-slate-500">Supports PNG, Chrome, and high-res JPEG</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border border-[#2a3953] bg-[#111d30] p-1.5">
+            <input
+              value={chatInput}
+              onChange={(event) => setChatInput(event.target.value)}
+              placeholder="Type your instruction..."
+              className="flex-1 bg-transparent px-2 text-xs text-slate-200 outline-none placeholder:text-slate-500"
+            />
+            <Mic className="h-3.5 w-3.5 text-slate-400" />
+            <button className="rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-500">
+              Send
+            </button>
+          </div>
+        </div>
       </article>
 
-      <aside className="glass-panel rounded-2xl p-5 lg:col-span-4 lg:max-h-[78vh] lg:overflow-auto">
-        {!selectedAgent ? (
-          <p className="text-sm text-slate-300">Selecciona un agente para iniciar una prueba.</p>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Testing</p>
-              <h3 className="text-lg font-semibold">Prueba rápida de agente</h3>
-              <p className="text-sm text-slate-300">
-                Ejecuta prompts de validación sin salir del panel.
-              </p>
-            </div>
-
-            <textarea
-              value={testPrompt}
-              onChange={(event) => setTestPrompt(event.target.value)}
-              rows={7}
-              className={baseFieldClass}
-              placeholder="Escribe una tarea para validar el agente..."
-            />
-
-            <div className="flex flex-wrap items-center justify-between gap-2">
+      <aside className="hidden bg-[#0c1728] xl:flex xl:flex-col">
+        <div className="border-b border-[#1e2a40] px-4 py-4">
+          <p className="text-sm font-semibold text-slate-100">Agent Configuration</p>
+          <div className="mt-3 inline-flex rounded-md border border-[#26344d] bg-[#101d31] p-1">
+            {(["settings", "history", "analytics"] as const).map((tab) => (
               <button
-                onClick={runAgentTest}
-                disabled={isRunning}
-                className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`rounded px-2 py-1 text-[10px] uppercase tracking-wide transition ${
+                  activeTab === tab
+                    ? "bg-blue-500/25 text-blue-200"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
               >
-                {isRunning ? "Ejecutando..." : "Probar agente"}
+                {tab}
               </button>
-              <p className="text-xs text-slate-400">Usa prompts cortos para bajar costo.</p>
-            </div>
-
-            {error ? (
-              <div className="rounded-lg border border-rose-400/30 bg-rose-500/10 p-3">
-                <p className="text-xs uppercase tracking-[0.16em] text-rose-300">Error</p>
-                <p className="mt-1 text-sm text-rose-200">{error}</p>
-              </div>
-            ) : null}
-
-            {respuesta ? (
-              <div className="rounded-lg border border-emerald-400/25 bg-emerald-500/5 p-3">
-                <p className="text-xs uppercase tracking-[0.16em] text-emerald-300">Respuesta</p>
-                <pre className="mt-2 max-h-[38vh] overflow-auto whitespace-pre-wrap text-sm text-slate-100">
-                  {respuesta}
-                </pre>
-              </div>
-            ) : (
-              <div className="rounded-lg border border-slate-700 bg-slate-900/50 p-3 text-sm text-slate-300">
-                La respuesta aparecerá aquí después de ejecutar la prueba.
-              </div>
-            )}
+            ))}
           </div>
-        )}
+        </div>
+
+        <div className="flex-1 space-y-5 overflow-auto px-4 py-4">
+          {activeTab === "settings" ? (
+            <>
+              <div>
+                <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-slate-500">Target Platforms</p>
+                <select
+                  value={targetPlatform}
+                  onChange={(event) => setTargetPlatform(event.target.value)}
+                  className="w-full rounded-md border border-[#26344d] bg-[#111d30] px-3 py-2 text-xs text-slate-200 outline-none"
+                >
+                  <option>n8n Workflow</option>
+                  <option>Social API</option>
+                  <option>CLAW Direct</option>
+                </select>
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Active Skills</p>
+                  <button className="text-[10px] text-blue-300">Edit</button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {skillOptions.map((skill) => {
+                    const active = activeSkills.includes(skill);
+                    return (
+                      <button
+                        key={skill}
+                        onClick={() => toggleSkill(skill)}
+                        className={`rounded-full border px-2.5 py-1 text-[10px] transition ${
+                          active
+                            ? "border-blue-500/50 bg-blue-500/20 text-blue-200"
+                            : "border-[#2a3953] bg-[#101d31] text-slate-400"
+                        }`}
+                      >
+                        {skill}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-slate-500">Agent Voice</p>
+                <div className="rounded-lg border border-[#2a3953] bg-[#111d30] p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-medium text-slate-200">Professional Male (US)</p>
+                    <p className="text-[10px] text-slate-500">{voiceTone}%</p>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={voiceTone}
+                    onChange={(event) => setVoiceTone(Number(event.target.value))}
+                    className="w-full accent-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-slate-500">Connections</p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between rounded-md border border-[#2a3953] bg-[#111d30] px-3 py-2 text-xs text-slate-200">
+                    <span className="inline-flex items-center gap-2">
+                      <Bell className="h-3.5 w-3.5 text-slate-400" />
+                      Google Drive
+                    </span>
+                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  </div>
+                  <div className="flex items-center justify-between rounded-md border border-[#2a3953] bg-[#111d30] px-3 py-2 text-xs text-slate-200">
+                    <span className="inline-flex items-center gap-2">
+                      <Share2 className="h-3.5 w-3.5 text-pink-300" />
+                      Zapier
+                    </span>
+                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="rounded-md border border-[#2a3953] bg-[#101d31] p-3 text-xs text-slate-400">
+              Panel {activeTab} en preparación.
+            </div>
+          )}
+
+          {syncMessage ? (
+            <p className="rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-1.5 text-[11px] text-emerald-200">
+              {syncMessage}
+            </p>
+          ) : null}
+          {dataError ? (
+            <p className="rounded-md border border-rose-500/25 bg-rose-500/10 px-2 py-1.5 text-[11px] text-rose-200">
+              {dataError}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="border-t border-[#1e2a40] p-4">
+          <button
+            onClick={() => void saveSelectedAgent()}
+            disabled={!selectedAgent || isSavingAgent}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSavingAgent ? "Aplicando..." : "Apply Configuration"}
+          </button>
+        </div>
       </aside>
     </section>
   );
