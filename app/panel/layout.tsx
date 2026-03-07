@@ -10,6 +10,7 @@ import {
   Database,
   House,
   MemoryStick,
+  Rocket,
   Settings,
   Wrench,
   Workflow,
@@ -25,6 +26,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: "/", label: "Home", icon: House, exact: true },
   { href: "/panel/workflows", label: "Workflows", icon: Workflow },
+  { href: "/panel/boardroom", label: "Boardroom", icon: Rocket },
   { href: "/panel/agentes", label: "Agentes", icon: Bot },
   { href: "/panel/herramientas", label: "Herramientas", icon: Wrench },
   { href: "/panel/models", label: "Models", icon: MemoryStick },
@@ -37,6 +39,8 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
   const isFullBleedRoute =
     pathname === "/panel/workflows" ||
     pathname.startsWith("/panel/workflows/") ||
+    pathname === "/panel/boardroom" ||
+    pathname.startsWith("/panel/boardroom/") ||
     pathname === "/panel/herramientas" ||
     pathname.startsWith("/panel/herramientas/") ||
     pathname === "/panel/models" ||
