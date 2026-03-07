@@ -7,6 +7,7 @@ import type { ComponentType } from "react";
 import {
   Bot,
   CircleUserRound,
+  Database,
   House,
   MemoryStick,
   Settings,
@@ -27,6 +28,7 @@ const navItems: NavItem[] = [
   { href: "/panel/agentes", label: "Agentes", icon: Bot },
   { href: "/panel/herramientas", label: "Herramientas", icon: Wrench },
   { href: "/panel/models", label: "Models", icon: MemoryStick },
+  { href: "/panel/knowledge-base", label: "Knowledge Base", icon: Database },
   { href: "/panel/settings", label: "Settings", icon: Settings },
 ];
 
@@ -39,6 +41,8 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
     pathname.startsWith("/panel/herramientas/") ||
     pathname === "/panel/models" ||
     pathname.startsWith("/panel/models/") ||
+    pathname === "/panel/knowledge-base" ||
+    pathname.startsWith("/panel/knowledge-base/") ||
     pathname === "/panel/settings" ||
     pathname.startsWith("/panel/settings/");
 
