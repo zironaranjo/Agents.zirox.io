@@ -68,6 +68,24 @@ Construir una interfaz web para un Sistema Multiagente Jerarquico donde:
   - Secciones base creadas: `workflows`, `agentes`, `arquitectura`, `logs`, `settings`.
   - `\`/panel\`` ahora redirige al dashboard principal `\`/panel/agentes\``.
   - `Workflows` en sidebar redirige al builder principal `\`/workflows\``.
+- Integración de diseño con Stitch completada:
+  - Stitch MCP autenticado por OAuth y verificado con `doctor` (`Healthy 200`).
+  - Configuración MCP agregada para Cursor (`stitch -> npx @_davideast/stitch-mcp proxy`).
+  - Flujo de aprobación de diseños creado (`stitch/pending`, `stitch/approved`, `stitch/rejected`).
+  - Regla de protección añadida: no implementar diseños sin aprobación explícita.
+- Workflow Builder reorganizado para reducir confusión:
+  - Categorías consolidadas: `Triggers`, `Agents`, `Social Channels`, `Automation & Apps`.
+  - `Social Channels` agrupado por plataforma (LinkedIn, Instagram, TikTok, YouTube, Facebook).
+  - `Node Settings` migrado a tabs: `Config`, `Mapping`, `Validation`.
+- Modo Matrix implementado para ejecución secuencial real:
+  - Cola de tareas pendientes en orden de creación (sin saltos).
+  - Selector de agente integrado para ejecución manual y ejecución por cola.
+  - Delegación manual bloqueable cuando Matrix Mode está activo.
+  - Persistencia global de Matrix Mode en Supabase (`system_settings`) con fallback local.
+  - Nuevos endpoints:
+    - `GET /api/tasks` (con filtro por estado y límite)
+    - `POST /api/tasks/matrix/execute`
+    - `GET/PATCH /api/settings/matrix-mode`
 
 ## 4) Arquitectura funcional (resumen)
 
@@ -112,14 +130,16 @@ Nota: se evita conectar frontend directamente a n8n/CLAW para mantener seguridad
 - [x] CRUD base de agentes (crear/listar/actualizar) via API.
 - [ ] CRUD completo de subagentes y relaciones jerarquicas.
 - [ ] Guardar relaciones jerarquicas y herramientas.
-- [ ] Guardar ejecuciones y logs de tareas.
+- [x] Guardar ejecuciones y estado de tareas (`task_runs` + `tasks`).
+- [x] Persistir configuración global de ejecución (`system_settings.matrix_mode_enabled`).
 
 ### Fase 3 - Ejecucion
 - [x] Integrar orquestador OpenClaw (delegacion y run completado).
-- [ ] Integrar workflows de n8n.
-- [ ] Estado/logs en tiempo real en UI.
+- [x] Integrar workflows de n8n (trigger desde API).
+- [~] Estado/logs en tiempo real en UI (auto-polling de runs listo; falta timeline/historial avanzado).
 - [x] Integrar prueba directa con OpenRouter desde backend.
 - [x] Crear endpoints base de integracion API para n8n + CLAW.
+- [x] Implementar Modo Matrix secuencial con ejecución en cola y control de errores.
 
 ### Fase 4 - Deploy y dominio
 - [x] Desplegar frontend en Dokploy.
@@ -182,15 +202,34 @@ Nota: se evita conectar frontend directamente a n8n/CLAW para mantener seguridad
 - Se elimina navegación superior de landing para simplificar foco visual y mantener CTA central.
 - Se crea app-shell de `\`/panel\`` con sidebar de navegación por módulos.
 
+### 2026-03-06
+- Se crea base de trabajo autónomo del agente con:
+  - reglas de proyecto (`.cursor/rules`),
+  - skills de proyecto (`.cursor/skills`),
+  - skills globales (`~/.cursor/skills`),
+  - estructura de tickets (`tasks/`) y comando reutilizable `matrix-init`.
+- `matrix-init` se amplía para incluir flujo de aprobación de diseño con carpeta `stitch/`.
+- Se conecta Stitch MCP por OAuth y se valida integración con estado saludable (`Healthy 200`).
+- Se prueba generación de pantallas en Stitch (hero desktop y mobile) y se documenta propuesta en `stitch/pending`.
+- Se reorganiza Workflow Builder para claridad operacional:
+  - categorías de paleta normalizadas,
+  - social por plataforma,
+  - settings por tabs.
+- Se implementa Modo Matrix funcional:
+  - ejecución secuencial de tareas pendientes,
+  - selector real de agentes,
+  - ejecución por `claw` / `agent` / `n8n`,
+  - switch global ON/OFF con persistencia en Supabase.
+
 ## 9) Proxima accion inmediata
 
-Continuar con mejoras funcionales sobre flujo ya operativo:
+Consolidar y endurecer el Modo Matrix ya implementado:
 
-- Integrar y validar delegacion real a `n8n` desde `/panel`.
-- Añadir timeline visual de ejecucion (auto-polling ya implementado).
-- Crear historial de runs y opcion de reintento.
-- Endurecer seguridad (rotar tokens expuestos y plan de RLS en Supabase).
-- Consolidar navegación de producto: decidir si `\`/workflows\`` se integra dentro del app-shell de `\`/panel\`` o se mantiene como vista dedicada externa.
+- Aplicar migración SQL en Supabase para `system_settings` en todos los entornos.
+- Añadir historial visual de cola Matrix (timeline + reintentos por tarea).
+- Incorporar reintento selectivo de tareas fallidas desde UI.
+- Endurecer seguridad (rotación de tokens expuestos y plan de RLS en Supabase).
+- Definir versión final de navegación: mantener `\`/workflows\`` dedicado o integrarlo plenamente al app-shell de `\`/panel\``.
 
 ### Prioridad visual inmediata (activa)
 

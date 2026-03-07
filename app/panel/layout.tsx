@@ -64,7 +64,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
         className={
           isWorkflowsRoute
             ? "w-full pb-0 pt-16"
-            : "w-full px-4 pb-6 pt-24 md:px-6 lg:px-8"
+            : "w-full px-4 pb-6 pt-16 md:px-6 lg:px-8"
         }
       >
         {children}
