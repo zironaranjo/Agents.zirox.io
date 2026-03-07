@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
@@ -28,7 +29,18 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
     <main className="landing-bg min-h-screen text-slate-100">
       <header className="sticky top-0 z-40 border-b border-slate-800/90 bg-slate-950/80 backdrop-blur-xl">
         <div className="flex h-16 w-full items-center justify-between gap-3 px-4 md:px-6 lg:px-8">
-          <nav className="flex items-center gap-1 overflow-x-auto">
+          <div className="flex items-center gap-3 overflow-x-auto">
+            <Link
+              href="/panel/agentes"
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/70 px-2 py-1.5 transition hover:bg-slate-800/80"
+              aria-label="Ir al panel principal"
+            >
+              <Image src="/logo.svg" alt="Agentes Matrix" width={22} height={22} />
+              <span className="hidden text-xs font-semibold tracking-[0.08em] text-slate-200 md:inline">
+                AGENTES MATRIX
+              </span>
+            </Link>
+            <nav className="flex items-center gap-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -50,7 +62,8 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
                 </Link>
               );
             })}
-          </nav>
+            </nav>
+          </div>
           <button
             type="button"
             aria-label="Usuario activo"
