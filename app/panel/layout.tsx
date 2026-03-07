@@ -23,7 +23,11 @@ const navItems: NavItem[] = [
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isWorkflowsRoute = pathname === "/panel/workflows" || pathname.startsWith("/panel/workflows/");
+  const isFullBleedRoute =
+    pathname === "/panel/workflows" ||
+    pathname.startsWith("/panel/workflows/") ||
+    pathname === "/panel/herramientas" ||
+    pathname.startsWith("/panel/herramientas/");
 
   return (
     <main className="landing-bg min-h-screen text-slate-100">
@@ -75,7 +79,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
       </header>
       <section
         className={
-          isWorkflowsRoute
+          isFullBleedRoute
             ? "w-full"
             : "w-full px-4 pb-6 pt-0 md:px-6 lg:px-8"
         }
