@@ -4,7 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
-import { Bot, CircleUserRound, House, Settings, Wrench, Workflow } from "lucide-react";
+import {
+  Bot,
+  CircleUserRound,
+  House,
+  MemoryStick,
+  Settings,
+  Wrench,
+  Workflow,
+} from "lucide-react";
 
 type NavItem = {
   href: string;
@@ -18,6 +26,7 @@ const navItems: NavItem[] = [
   { href: "/panel/workflows", label: "Workflows", icon: Workflow },
   { href: "/panel/agentes", label: "Agentes", icon: Bot },
   { href: "/panel/herramientas", label: "Herramientas", icon: Wrench },
+  { href: "/panel/models", label: "Models", icon: MemoryStick },
   { href: "/panel/settings", label: "Settings", icon: Settings },
 ];
 
@@ -28,6 +37,8 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
     pathname.startsWith("/panel/workflows/") ||
     pathname === "/panel/herramientas" ||
     pathname.startsWith("/panel/herramientas/") ||
+    pathname === "/panel/models" ||
+    pathname.startsWith("/panel/models/") ||
     pathname === "/panel/settings" ||
     pathname.startsWith("/panel/settings/");
 
