@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Bot, CircleUserRound, House, Settings, Wrench, Workflow } from "lucide-react";
 
 const navItems = [
-  { href: "/panel/workflows", label: "Workflows" },
-  { href: "/panel/agentes", label: "Agentes" },
-  { href: "/panel/arquitectura", label: "Arquitectura" },
-  { href: "/panel/logs", label: "Logs" },
-  { href: "/panel/settings", label: "Settings" },
+  { href: "/", label: "Home", icon: House, exact: true },
+  { href: "/panel/workflows", label: "Workflows", icon: Workflow },
+  { href: "/panel/agentes", label: "Agentes", icon: Bot },
+  { href: "/panel/herramientas", label: "Herramientas", icon: Wrench },
+  { href: "/panel/settings", label: "Settings", icon: Settings },
 ] as const;
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
@@ -16,47 +17,42 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
 
   return (
     <main className="landing-bg min-h-screen text-slate-100">
-      <section className="mx-auto flex min-h-screen w-full max-w-[1700px]">
-        <aside className="hidden w-72 border-r border-slate-800/90 bg-slate-950/45 p-5 lg:block">
-          <div className="mb-7">
-            <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Agents Matrix</p>
-            <h1 className="mt-2 text-xl font-semibold">Panel Operativo</h1>
-            <p className="mt-2 text-sm text-slate-300">
-              Navega por módulos del software desde un solo workspace.
-            </p>
-          </div>
-
-          <nav className="space-y-2">
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-800/90 bg-slate-950/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 w-full max-w-[1700px] items-center justify-between gap-3 px-4 md:px-6 lg:px-8">
+          <nav className="flex items-center gap-1 overflow-x-auto">
             {navItems.map((item) => {
+              const Icon = item.icon;
               const isActive =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
+                item.exact
+                  ? pathname === item.href
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block rounded-lg border px-3 py-2 text-sm transition ${
+                  className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
                     isActive
                       ? "border-cyan-300/60 bg-cyan-400/10 text-cyan-200"
                       : "border-transparent text-slate-300 hover:border-slate-700 hover:bg-slate-900/70"
                   }`}
                 >
+                  <Icon className="h-4 w-4" />
                   {item.label}
                 </Link>
               );
             })}
           </nav>
-
-          <div className="mt-8 border-t border-slate-800 pt-4">
-            <Link
-              href="/"
-              className="inline-flex rounded-md border border-slate-700 px-3 py-2 text-xs text-slate-200 transition hover:bg-slate-800/70"
-            >
-              Volver al landing
-            </Link>
-          </div>
-        </aside>
-
-        <div className="flex-1 px-4 py-6 md:px-6 lg:px-8">{children}</div>
+          <button
+            type="button"
+            aria-label="Usuario activo"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-900/70 text-slate-200"
+          >
+            <CircleUserRound className="h-5 w-5" />
+          </button>
+        </div>
+      </header>
+      <section className="mx-auto w-full max-w-[1700px] px-4 pb-6 pt-24 md:px-6 lg:px-8">
+        {children}
       </section>
     </main>
   );

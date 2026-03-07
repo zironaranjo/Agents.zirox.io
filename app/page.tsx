@@ -137,13 +137,7 @@ export default async function Home() {
                     href="/panel/agentes"
                     className="rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-semibold text-slate-950 transition hover:bg-orange-400 sm:px-5 sm:py-3 sm:text-sm"
                   >
-                    Entrar al dashboard
-                  </Link>
-                  <Link
-                    href="/workflows"
-                    className="rounded-xl border border-slate-600 bg-slate-900/55 px-4 py-2.5 text-xs text-slate-100 transition hover:bg-slate-800/80 sm:px-5 sm:py-3 sm:text-sm"
-                  >
-                    Ver workflows
+                    Dashboard
                   </Link>
                 </div>
               </div>
