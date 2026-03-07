@@ -22,11 +22,12 @@ const navItems: NavItem[] = [
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isWorkflowsRoute = pathname === "/panel/workflows" || pathname.startsWith("/panel/workflows/");
 
   return (
     <main className="landing-bg min-h-screen text-slate-100">
       <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-800/90 bg-slate-950/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-[1700px] items-center justify-between gap-3 px-4 md:px-6 lg:px-8">
+        <div className="flex h-16 w-full items-center justify-between gap-3 px-4 md:px-6 lg:px-8">
           <nav className="flex items-center gap-1 overflow-x-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -59,7 +60,13 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
       </header>
-      <section className="mx-auto w-full max-w-[1700px] px-4 pb-6 pt-24 md:px-6 lg:px-8">
+      <section
+        className={
+          isWorkflowsRoute
+            ? "w-full pb-0 pt-16"
+            : "w-full px-4 pb-6 pt-24 md:px-6 lg:px-8"
+        }
+      >
         {children}
       </section>
     </main>

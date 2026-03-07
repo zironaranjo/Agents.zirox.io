@@ -577,7 +577,7 @@ export function WorkflowsPageContent({
 
   return (
     <main
-      className={`${embeddedInPanel ? "h-[calc(100vh-8.5rem)]" : "h-screen"} overflow-hidden bg-[#0b1022] text-slate-100 ${inter.className}`}
+      className={`${embeddedInPanel ? "h-[calc(100vh-4rem)]" : "h-screen"} overflow-hidden bg-[#0b1022] text-slate-100 ${inter.className}`}
     >
       {!embeddedInPanel && (
         <header className="flex h-16 items-center justify-between border-b border-[#2a3556] bg-[#0f152a] px-4 md:px-6">
