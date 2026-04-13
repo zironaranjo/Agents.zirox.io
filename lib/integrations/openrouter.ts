@@ -8,6 +8,7 @@ type OpenRouterResponse = {
   }>;
   error?: {
     message?: string;
+    code?: number;
   };
 };
 
@@ -64,13 +65,30 @@ export async function runOpenRouterPrompt(params: {
     }),
   });
 
-  const data = (await upstream.json()) as OpenRouterResponse;
-  if (!upstream.ok) {
-    throw new Error(data?.error?.message ?? "Error de OpenRouter.");
+  const rawText = await upstream.text();
+  let data: OpenRouterResponse;
+  try {
+    data = JSON.parse(rawText) as OpenRouterResponse;
+  } catch {
+    throw new Error(
+      `OpenRouter respondió sin JSON válido (HTTP ${upstream.status}). Primeros caracteres: ${rawText.slice(0, 160)}`,
+    );
   }
 
+  const err = data?.error;
+  if (err?.message) {
+    const code = err.code != null ? ` [código ${err.code}]` : "";
+    throw new Error(`${err.message}${code}`);
+  }
+
+  if (!upstream.ok) {
+    throw new Error(`OpenRouter HTTP ${upstream.status}. Revisa créditos, modelo y clave API.`);
+  }
+
+  const output = extractOpenRouterContent(data?.choices?.[0]?.message?.content);
+
   return {
-    output: extractOpenRouterContent(data?.choices?.[0]?.message?.content),
+    output,
     raw: data,
   };
 }

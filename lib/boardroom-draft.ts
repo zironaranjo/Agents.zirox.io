@@ -1,13 +1,35 @@
 import type { DepartmentSlug } from "@/lib/departments";
 
-/** Modelo por defecto: tier gratuito en OpenRouter (ajustable con OPENROUTER_BOARDROOM_MODEL). */
-export const OPENROUTER_BOARDROOM_MODEL_DEFAULT =
-  "meta-llama/llama-3.2-3b-instruct:free";
+/**
+ * Modelo por defecto: gratuito en OpenRouter.
+ * Gemma suele fallar menos que otros :free con "Provider returned error" por saturación del proveedor.
+ */
+export const OPENROUTER_BOARDROOM_MODEL_DEFAULT = "google/gemma-2-9b-it:free";
+
+/** Otros modelos gratuitos a probar si el principal devuelve error de proveedor. */
+export const OPENROUTER_BOARDROOM_FALLBACKS: readonly string[] = [
+  "meta-llama/llama-3.2-3b-instruct:free",
+  "mistralai/mistral-7b-instruct:free",
+];
 
 export function resolveBoardroomModel(): string {
   return (
     process.env.OPENROUTER_BOARDROOM_MODEL?.trim() || OPENROUTER_BOARDROOM_MODEL_DEFAULT
   );
+}
+
+/** Lista única: primero el configurado, luego fallbacks. */
+export function getBoardroomModelCandidates(): string[] {
+  const primary = resolveBoardroomModel();
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const m of [primary, ...OPENROUTER_BOARDROOM_FALLBACKS]) {
+    const id = m.trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
 }
 
 export function getBoardroomDraftSystemPrompt(

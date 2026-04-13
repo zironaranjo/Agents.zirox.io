@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   getBoardroomDraftSystemPrompt,
-  resolveBoardroomModel,
+  getBoardroomModelCandidates,
 } from "@/lib/boardroom-draft";
 import { runOpenRouterPrompt } from "@/lib/integrations/openrouter";
 import { isDepartmentSlug } from "@/lib/departments";
@@ -40,24 +40,36 @@ export async function POST(request: Request) {
     const systemPrompt = getBoardroomDraftSystemPrompt(slug);
     const userPrompt = `Pedido del usuario:\n${userRequest}\n\nGenera el entregable siguiendo tu rol y formato.`;
 
-    const model = resolveBoardroomModel();
+    const candidates = getBoardroomModelCandidates();
+    let lastError = "Sin respuesta";
 
-    const { output } = await runOpenRouterPrompt({
-      model,
-      systemPrompt,
-      userPrompt,
-      temperature: 0.65,
-      maxTokens: 1_600,
-    });
+    for (const model of candidates) {
+      try {
+        const { output } = await runOpenRouterPrompt({
+          model,
+          systemPrompt,
+          userPrompt,
+          temperature: 0.65,
+          maxTokens: 1_200,
+        });
 
-    if (!output?.trim()) {
-      return NextResponse.json(
-        { error: "El modelo no devolvió texto. Prueba de nuevo o cambia de modelo en OPENROUTER_BOARDROOM_MODEL." },
-        { status: 502 },
-      );
+        if (output?.trim()) {
+          return NextResponse.json({ output: output.trim() });
+        }
+
+        lastError = `El modelo ${model} devolvió texto vacío.`;
+      } catch (err) {
+        lastError =
+          err instanceof Error ? err.message : "Error desconocido al llamar a OpenRouter.";
+      }
     }
 
-    return NextResponse.json({ output: output.trim() });
+    return NextResponse.json(
+      {
+        error: `${lastError} Si usas modelos :free, el proveedor a veces se satura: espera un minuto, vuelve a intentar o define OPENROUTER_BOARDROOM_MODEL con otro modelo en openrouter.ai/models.`,
+      },
+      { status: 502 },
+    );
   } catch (error) {
     const message =
       error instanceof Error
