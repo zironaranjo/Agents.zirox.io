@@ -6,10 +6,13 @@ import type { DepartmentSlug } from "@/lib/departments";
  */
 export const OPENROUTER_BOARDROOM_MODEL_DEFAULT = "google/gemma-2-9b-it:free";
 
-/** Otros modelos gratuitos a probar si el principal devuelve error de proveedor. */
+/**
+ * Otros modelos a probar si el principal falla.
+ * `openrouter/free` es el router oficial: elige un modelo :free con endpoint disponible (evita 404 por modelos retirados).
+ */
 export const OPENROUTER_BOARDROOM_FALLBACKS: readonly string[] = [
   "meta-llama/llama-3.2-3b-instruct:free",
-  "mistralai/mistral-7b-instruct:free",
+  "openrouter/free",
 ];
 
 export function resolveBoardroomModel(): string {
