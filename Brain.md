@@ -32,6 +32,7 @@ Construir una interfaz web para un Sistema Multiagente Jerarquico donde:
   - Endpoint `POST /api/agents/run`.
   - Boton "Probar agente" en `/panel`.
   - Variables de entorno documentadas con `.env.example`.
+  - Boardroom (departamentos): `POST /api/boardroom/draft` genera borradores desde la UI con el mismo `OPENROUTER_API_KEY`. Modelo por defecto gratuito `meta-llama/llama-3.2-3b-instruct:free`; opcional `OPENROUTER_BOARDROOM_MODEL`. Prompt de sistema segun `departmentSlug` (`lib/boardroom-draft.ts`).
 - Persistencia Supabase (fase inicial) completada:
   - Tabla `agents` creada en Supabase.
   - Script SQL versionado en `web/supabase/schema.sql`.

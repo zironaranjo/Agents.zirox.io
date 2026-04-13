@@ -13,6 +13,7 @@ import {
   Trash2,
   WandSparkles,
 } from "lucide-react";
+import { BoardroomPublicationComposer } from "@/components/boardroom-publication-composer";
 import {
   DEPARTMENT_TITLE_BY_SLUG,
   boardroomTaskAvatarClass,
@@ -232,44 +233,11 @@ export default async function PanelBoardroomPage({
           <div className="grid grid-cols-1 gap-8 p-6 md:p-8 lg:grid-cols-3">
             <div className="flex flex-col gap-6 lg:col-span-2">
               {ctx.showPublicationComposer ? (
-                <div className="rounded-2xl border border-[#0062ff]/30 bg-gradient-to-br from-[#0062ff]/10 to-slate-900/40 p-5 shadow-sm md:p-6">
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="text-base font-bold text-slate-100">
-                        {ctx.composerTitle ?? "Nueva publicación"}
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-400">
-                        Describe el tema, canal (LinkedIn, Instagram…), tono y CTA. Nova preparará un borrador;
-                        Pulse revisará formato; puedes copiar el texto o conectar n8n para publicar después.
-                      </p>
-                    </div>
-                    <span className="shrink-0 rounded-lg bg-emerald-500/15 px-2 py-1 text-[10px] font-bold uppercase text-emerald-400">
-                      Paso 1 · Pedido
-                    </span>
-                  </div>
-                  <label className="sr-only" htmlFor="boardroom-composer">
-                    Texto del pedido de publicación
-                  </label>
-                  <textarea
-                    id="boardroom-composer"
-                    rows={4}
-                    placeholder={ctx.composerPlaceholder}
-                    className="w-full resize-y rounded-xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-[#0062ff]/50 focus:outline-none focus:ring-1 focus:ring-[#0062ff]/40"
-                  />
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-[11px] text-slate-500">
-                      Próximo paso (cuando conectemos agentes): enviar a Nova y ver la respuesta en la actividad
-                      de abajo.
-                    </p>
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#0062ff] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#0062ff]/20 hover:bg-[#0057e6]"
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      Pedir borrador al equipo
-                    </button>
-                  </div>
-                </div>
+                <BoardroomPublicationComposer
+                  departmentSlug={deptKey ?? null}
+                  composerTitle={ctx.composerTitle}
+                  composerPlaceholder={ctx.composerPlaceholder}
+                />
               ) : null}
 
               <div className="flex min-h-[420px] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 shadow-sm md:min-h-[520px]">

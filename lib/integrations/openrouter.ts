@@ -38,12 +38,19 @@ export async function runOpenRouterPrompt(params: {
     throw new Error("Falta OPENROUTER_API_KEY en variables de entorno del servidor.");
   }
 
+  const referer =
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    (process.env.VERCEL_URL?.trim()
+      ? `https://${process.env.VERCEL_URL.trim()}`
+      : null) ||
+    "http://localhost:3000";
+
   const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "http://localhost:3000",
+      "HTTP-Referer": referer,
       "X-Title": "Agentes Matrix",
     },
     body: JSON.stringify({
