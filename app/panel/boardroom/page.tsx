@@ -12,6 +12,7 @@ import {
   WandSparkles,
   Wrench,
 } from "lucide-react";
+import { DEPARTMENT_TITLE_BY_SLUG, isDepartmentSlug } from "@/lib/departments";
 
 const agents = [
   {
@@ -53,7 +54,16 @@ const logs = [
   ["14:35:12", "OK", "text-green-500", "Claw", "text-orange-400", "Security audit for migration plan initiated. All preliminary checks passed."],
 ] as const;
 
-export default function PanelBoardroomPage() {
+export default async function PanelBoardroomPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ dept?: string }>;
+}) {
+  const sp = (await searchParams) ?? {};
+  const deptSlug = typeof sp.dept === "string" ? sp.dept : undefined;
+  const deptTitle =
+    deptSlug && isDepartmentSlug(deptSlug) ? DEPARTMENT_TITLE_BY_SLUG[deptSlug] : null;
+
   return (
     <section className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-col overflow-hidden bg-[#0f1723] text-slate-100">
       <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-800 bg-[#0f1723] px-6 py-3">
@@ -187,12 +197,18 @@ export default function PanelBoardroomPage() {
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
               <div>
                 <div className="mb-1 flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#4f9dff]">Active Session</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#4f9dff]">
+                    Sesi\u00f3n activa
+                  </span>
                   <span className="h-1.5 w-1.5 rounded-full bg-[#0062ff] animate-pulse" />
                 </div>
-                <h1 className="text-3xl font-black tracking-tight">Project: Quantum Leap</h1>
+                <h1 className="text-3xl font-black tracking-tight">
+                  {deptTitle ? `Departamento: ${deptTitle}` : "Proyecto: Quantum Leap"}
+                </h1>
                 <p className="mt-1 text-sm text-slate-500">
-                  Multi-agent strategy session to optimize cloud infrastructure deployment.
+                  {deptTitle
+                    ? "Los agentes coordinan creaci\u00f3n, publicaci\u00f3n y respuestas con el contexto compartido de este equipo."
+                    : "Sesi\u00f3n multiagente para alinear estrategia y ejecuci\u00f3n (demo visual)."}
                 </p>
               </div>
               <div className="flex items-center gap-3">

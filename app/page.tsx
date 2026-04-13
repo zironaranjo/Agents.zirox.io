@@ -134,7 +134,7 @@ export default async function Home() {
                 </p>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   <Link
-                    href="/panel/agentes"
+                    href="/panel/departamentos"
                     className="rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-semibold text-slate-950 transition hover:bg-orange-400 sm:px-5 sm:py-3 sm:text-sm"
                   >
                     Dashboard
@@ -167,7 +167,7 @@ export default async function Home() {
                 href="/workflows"
                 className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-orange-400"
               >
-                Crear workflow
+                Automatizaciones (avanzado)
               </Link>
               <a
                 href="#arquitectura"

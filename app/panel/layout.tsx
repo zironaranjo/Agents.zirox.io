@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
 import {
   Bot,
+  Building2,
   CircleUserRound,
   Database,
   House,
@@ -13,7 +14,6 @@ import {
   Rocket,
   Settings,
   Wrench,
-  Workflow,
 } from "lucide-react";
 
 type NavItem = {
@@ -25,7 +25,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: "/", label: "Home", icon: House, exact: true },
-  { href: "/panel/workflows", label: "Workflows", icon: Workflow },
+  { href: "/panel/departamentos", label: "Departamentos", icon: Building2 },
   { href: "/panel/boardroom", label: "Boardroom", icon: Rocket },
   { href: "/panel/agentes", label: "Agentes", icon: Bot },
   { href: "/panel/herramientas", label: "Herramientas", icon: Wrench },
@@ -37,6 +37,8 @@ const navItems: NavItem[] = [
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isFullBleedRoute =
+    pathname === "/panel/departamentos" ||
+    pathname.startsWith("/panel/departamentos/") ||
     pathname === "/panel/workflows" ||
     pathname.startsWith("/panel/workflows/") ||
     pathname === "/panel/boardroom" ||
@@ -56,9 +58,9 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
         <div className="flex h-16 w-full items-center justify-between gap-3 px-4 md:px-6 lg:px-8">
           <div className="flex items-center gap-3 overflow-x-auto">
             <Link
-              href="/panel/agentes"
+              href="/panel/departamentos"
               className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/70 px-2 py-1.5 transition hover:bg-slate-800/80"
-              aria-label="Ir al panel principal"
+              aria-label="Ir a departamentos"
             >
               <Image src="/logo.svg" alt="Agentes Matrix" width={22} height={22} />
               <span className="hidden text-xs font-semibold tracking-[0.08em] text-slate-200 md:inline">
